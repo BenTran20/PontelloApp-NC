@@ -25,7 +25,7 @@ namespace PontelloApp.Models
 
         public ICollection<OrderItem>? Items { get; set; } = new HashSet<OrderItem>();
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // make ShippingId nullable so Order can exist without shipping
         public Shipping? Shipping { get; set; }
