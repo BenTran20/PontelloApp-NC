@@ -1,0 +1,186 @@
+@model PontelloApp.Models.Order
+
+@{
+    ViewData["Title"] = "Your Cart";
+}
+
+<div class="container py-5">
+    <h2 class="fw-bold mb-4 d-flex justify-content-between">
+        <span>Your Shopping Cart</span>
+        <span>@(Model?.Items?.Count() ?? 0) items</span>
+    </h2>
+
+    @if (Model == null || !Model.Items.Any())
+    {
+        <div class="alert alert-light border">
+            Your cart is empty.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+
+            <!-- LEFT SIDE - CART ITEMS -->
+            <div class="col-lg-8">
+
+                <div class="row fw-bold border-bottom pb-2 mb-3">
+                    <div class="col-md-5">Product</div>
+                    <div class="col-md-2 text-center">Price</div>
+                    <div class="col-md-3 text-center">Quantity</div>
+                    <div class="col-md-2 text-end">Total</div>
+                </div>
+
+                @foreach (var item in Model.Items)
+                {
+                    <div class="card mb-4 shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+
+                                <!-- Product Info -->
+                                <div class="col-md-5">
+                                    <h5 class="fw-bold">@item.Product?.ProductName</h5>
+
+                                    @if (item.ProductVariant != null && item.ProductVariant.Options.Any())
+                                    {
+                                        <small class="text-muted">
+                                            @string.Join(" / ", item.ProductVariant.Options.Select(o => $"{o.Name}: {o.Value}"))
+                                        </small>
+                                    }
+                                </div>
+
+                                <!-- Price -->
+                                <div class="col-md-2 text-center">
+                                    <span class="fw-semibold">$@item.UnitPrice.ToString("0.00")</span>
+                                </div>
+
+                                <!-- Quantity -->
+                                <div class="col-md-3 text-center">
+                                    <form asp-action="UpdateCart" asp-controller="Cart" method="post" class="d-flex justify-content-center">
+                                        <input type="hidden" name="id" value="@item.Id" />
+
+                                        <button type="submit" name="action" value="minus" class="btn btn-outline-dark btn-sm">-</button>
+
+                                        <input type="text"
+                                               inputmode="numeric"
+                                               pattern="[0-9]*"
+                                               name="quantity"
+                                               value="@item.Quantity"
+                                               class="form-control text-center mx-2 allow-enter"
+                                               style="width:60px;" />
+
+                                        <button type="submit" name="action" value="plus" class="btn btn-outline-dark btn-sm">+</button>
+
+                                        <button type="submit" class="d-none update-typed"></button>
+                                    </form>
+                                </div>
+
+                                <!-- Total -->
+                                <div class="col-md-2 d-flex justify-content-end align-items-center gap-2">
+                                    <div class="fw-bold">$@item.TotalPrice.ToString("0.00")</div>
+
+                                    <form asp-action="RemoveItem"
+                                          asp-controller="Cart"
+                                          method="post"
+                                          class="mt-2">
+                                        <input type="hidden" name="itemId" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm text-muted">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Continue Shopping Button -->
+                <a asp-controller="ProductDealer" asp-action="Index"
+                   class="btn btn-outline-dark"
+                   style="text-decoration: none;">
+                    Continue Shopping
+                </a>
+            </div>
+
+            <!-- RIGHT SIDE - SUMMARY -->
+            <div class="col-lg-4">
+
+                <div class="card shadow-sm border-0 p-4">
+
+                    <h5 class="fw-bold mb-3">Order Summary</h5>
+
+                    @{
+                        var subtotal = Model.Items.Sum(i => i.TotalPrice);
+                        var tax = Math.Round(subtotal * 0.13m, 2);
+                        var shippingFee = subtotal >= 50m ? 0m : Math.Clamp(Math.Round(subtotal * 0.10m, 2), 2m, 15m);
+                        var grandTotal = Math.Round(subtotal + tax + shippingFee, 2);
+
+                    }
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>$@subtotal.ToString("0.00")</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tax (13%): </span>
+                        <span>$@tax.ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span>TBD</span>
+                    </div>
+                    <hr />
+
+                    <div class="d-flex justify-content-between fs-4 fw-bold mb-4">
+                        <span>Grand Total:</span>
+                        <span>$@grandTotal.ToString("0.00")</span>
+                    </div>
+
+                    <div class="alert alert-light border small mb-3">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Payment is not required at this time. Once your order request is submitted,
+                        the Pontello team will review it and follow up with payment instructions.
+                    </div>
+
+                    <div class="alert alert-warning border small mb-3">
+                        <i class="bi bi-truck me-1"></i>
+                        Additional shipping costs may apply and will be added when your order is processed.
+                    </div>
+
+                    <form asp-action="Checkout"
+                          asp-controller="Cart"
+                          asp-route-id="@Model.Id"
+                          method="post">
+
+                        <button type="submit" class="btn btn-dark w-100 py-2">
+                            Complete Order Request
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('.allow-enter').on('keydown', function (e) {
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                        $(this).closest('form').submit(); // submit typed value
+
+                }
+            });
+
+            $('.allow-enter').on('change', function () {
+                $(this).closest('form').submit();
+            });
+        });
+    </script>
+}

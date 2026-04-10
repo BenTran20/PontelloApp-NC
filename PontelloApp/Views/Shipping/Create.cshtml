@@ -1,0 +1,213 @@
+@model PontelloApp.Models.Order
+
+@{
+    ViewData["Title"] = "Checkout";
+
+    var subtotal = Model.Items.Sum(i => i.TotalPrice);
+    var hasBin = !string.IsNullOrWhiteSpace(Model.Shipping?.BinOrEin);
+    var tax = hasBin ? 0m : Math.Round(subtotal * 0.13m, 2);
+    var total = Math.Round(subtotal + tax, 2);
+}
+
+<div class="container-fluid py-2" style="max-width: 1150px;">
+
+    <h2 class="mb-4">Checkout</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-3">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+
+        @* Left: Form *@
+        <div class="col-lg-8">
+            <form asp-action="Create" asp-controller="Shipping" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="orderId" value="@Model.Id" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3"></div>
+
+                @* Contact *@
+                <div class="card border mb-3">
+                    <div class="card-body">
+                        <p class="text-uppercase fw-semibold mb-2" style="font-size:13px; letter-spacing:.07em; color:#adb5bd;">Contact</p>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="Shipping.FullName" class="form-label">Contact name <span class="text-danger">*</span></label>
+                                <input asp-for="Shipping.FullName" class="form-control" type="text" />
+                                <span asp-validation-for="Shipping.FullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Shipping.CompanyName" class="form-label">Company name</label>
+                                <input asp-for="Shipping.CompanyName" class="form-control" type="text" />
+                                <span asp-validation-for="Shipping.CompanyName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="Shipping.Email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input asp-for="Shipping.Email" class="form-control" type="email" />
+                                <span asp-validation-for="Shipping.Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="Shipping.Phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                                <input asp-for="Shipping.Phone" class="form-control" type="tel" />
+                                <span asp-validation-for="Shipping.Phone" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* Shipping address *@
+                <div class="card border mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <p class="text-uppercase fw-semibold mb-0" style="font-size:13px; letter-spacing:.07em; color:#adb5bd;">Shipping address</p>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-sm-8">
+                                <label asp-for="Shipping.StreetAddress" class="form-label">Street address <span class="text-danger">*</span></label>
+                                <input asp-for="Shipping.StreetAddress" class="form-control" type="text" />
+                                <span asp-validation-for="Shipping.StreetAddress" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">Suite / Unit <span class="text-muted fw-normal">(optional)</span></label>
+                                <input name="Shipping.AddressLine2" class="form-control" type="text"
+                                       value="@Model.Shipping?.StreetAddress2" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label asp-for="Shipping.City" class="form-label">City <span class="text-danger">*</span></label>
+                                <input asp-for="Shipping.City" class="form-control" type="text" />
+                                <span asp-validation-for="Shipping.City" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-3">
+                                <label asp-for="Shipping.Province" class="form-label">Province <span class="text-danger">*</span></label>
+                                <input asp-for="Shipping.Province" class="form-control" type="text" />
+                                <span asp-validation-for="Shipping.Province" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-2">
+                                <label asp-for="Shipping.PostalCode" class="form-label">Postal code <span class="text-danger">*</span></label>
+                                <input asp-for="Shipping.PostalCode" class="form-control" type="text" />
+                                <span asp-validation-for="Shipping.PostalCode" class="text-danger small"></span>
+                            </div>
+                            <div class="col-sm-3">
+                                <label asp-for="Shipping.Country" class="form-label">Country <span class="text-danger">*</span></label>
+                                <select asp-for="Shipping.Country" class="form-select">
+                                    <option value="Canada">Canada</option>
+                                    <option value="United States">United States</option>
+                                </select>
+                                <span asp-validation-for="Shipping.Country" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @* BIN/EIN + Notes *@
+                <div class="card border mb-3">
+                    <div class="card-body">
+                        <p class="text-uppercase fw-semibold mb-3" style="font-size:13px; letter-spacing:.07em; color:#adb5bd;">Additional</p>
+                        <div class="row g-3">
+                            <div class="col-sm-5">
+                                <label asp-for="Shipping.BinOrEin" class="form-label">
+                                    BIN / EIN <span class="text-muted fw-normal">(optional)</span>
+                                </label>
+                                <input asp-for="Shipping.BinOrEin" class="form-control" type="text" placeholder="12-3456789" />
+                                <div class="form-text">If provided, tax (13%) will be waived.</div>
+                            </div>
+                            <div class="col-sm-7">
+                                <label asp-for="Shipping.DeliveryNotes" class="form-label">Delivery instructions</label>
+                                <textarea asp-for="Shipping.DeliveryNotes" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-light border small mb-3">
+                    Payment is not required at this time. Pontello will follow up with payment instructions after reviewing your order.
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-dark px-5">Submit order request</button>
+                </div>
+
+            </form>
+        </div>
+
+        @*  Right: Order summary  *@
+        <div class="col-lg-4">
+            <div class="card border" style="position: sticky; top: 20px;">
+                <div class="card-body">
+                    <p class="text-uppercase fw-semibold mb-3" style="font-size:14px; letter-spacing:.07em;">Order summary</p>
+
+                    @* Line items *@
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="d-flex justify-content-between mb-2 ">
+                            <span class="text-muted" style="max-width:70%;">
+                                @item.Product.ProductName
+                                <span class="text-muted ms-1">× @item.Quantity</span>
+                            </span>
+                            <span>$@item.TotalPrice.ToString("F2")</span>
+                        </div>
+                    }
+
+                    <hr class="my-2" />
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Subtotal</span>
+                        <span>$@subtotal.ToString("F2")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 ">
+                        <span class="text-muted">
+                            Tax (13%)
+                            @if (hasBin)
+                            {
+                                <span class="badge bg-success rounded-pill ms-1" style="font-size:10px;">Exempt</span>
+                            }
+                        </span>
+                        <span>@(hasBin ? "—" : $"${tax.ToString("F2")}")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1  text-muted">
+                        <span>Shipping</span>
+                        <span>TBD</span>
+                    </div>
+
+                    <hr class="my-2" />
+
+                    <div class="d-flex justify-content-between fw-semibold">
+                        <span>Total</span>
+                        <span>$@total.ToString("F2")</span>
+                    </div>
+
+                    <p class="text-muted mt-2 mb-0" style="font-size:13px;">
+                        Additional shipping costs may apply once your order is processed.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        const postalInput = document.querySelector("[name='Shipping.PostalCode']");
+
+        if (postalInput) {
+            postalInput.addEventListener("input", function (e) {
+                let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+                if (value.length > 3) {
+                    value = value.slice(0, 3) + " " + value.slice(3, 6);
+                }
+
+                e.target.value = value;
+            });
+        }
+    </script>
+}

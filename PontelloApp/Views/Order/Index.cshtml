@@ -1,0 +1,275 @@
+@using PontelloApp.Models
+@model IEnumerable<PontelloApp.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+
+    int index = 1;
+}
+<div class="container-fluid mt-4">
+    <!-- FILTER CARD -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+
+            <form method="get">
+                <div class="row g-3 align-items-end">
+
+                    <!-- FROM DATE -->
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted">
+                            From Date
+                        </label>
+                        <input type="date"
+                               name="FromDate"
+                               value="@Context.Request.Query["FromDate"]"
+                               class="form-control" />
+                    </div>
+
+                    <!-- TO DATE -->
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted">
+                            To Date
+                        </label>
+                        <input type="date"
+                               name="ToDate"
+                               value="@Context.Request.Query["ToDate"]"
+                               class="form-control" />
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="col-md-2">
+                        <label class="form-label small text-muted">
+                            Status
+                        </label>
+                        @Html.DropDownList(
+                        "Status", (SelectList)ViewData["OrderStatusID"], "All Status", new { @class = "form-select" })
+                    </div>
+
+                    <!-- SEARCH PO -->
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted">
+                            PO Number
+                        </label>
+
+                        <div class="input-group">
+                            @Html.TextBox(
+                            "SearchString", null,
+                            new { @class = "form-control", placeholder = "Search PO #" })
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- BUTTONS -->
+                    <div class="col-md-3 d-flex gap-2">
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary w-50">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Clear
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary w-50">
+                            <i class="bi bi-funnel me-1"></i>
+                            Apply
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ORDER TABLE -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:8%">ID</th>
+                        <th style="width:18%">PO Number</th>
+                        <th style="width:12%">Date</th>
+                        <th style="width:12%">Total</th>
+                        <th style="width:10%">Status</th>
+                        <th style="width:20%">Email</th>
+                        <th class="text-end" style="width:30%">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                No orders found
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var o in Model)
+                        {
+                            string badge = o.Status switch
+                            {
+                                OrderStatus.Draft => "text-bg-secondary",
+                                OrderStatus.Submitted => "text-bg-warning",
+                                OrderStatus.Approved => "text-bg-success",
+                                OrderStatus.Rejected => "text-bg-danger",
+                                OrderStatus.Shipped => "text-bg-primary",
+                                _ => "text-bg-secondary"
+                            };
+
+                            <tr>
+                                <!-- ID -->
+                                <td>
+                                    <span class="text-muted">#@index</span>
+                                </td>
+                                @{
+                                    index++;
+                                }
+
+                                <!-- PO -->
+                                <td>
+                                    <strong>@o.PONumber</strong>
+                                </td>
+
+                                <!-- DATE -->
+                                <td>
+                                    @o.CreatedAt.ToString("MMM dd, yyyy")
+                                </td>
+
+                                <!-- TOTAL -->
+                                <td class="fw-semibold">
+                                    @o.TotalAmount.ToString("C")
+                                </td>
+
+                                <!-- STATUS -->
+                                <td>
+                                    <span class="badge @badge">
+                                        @o.Status
+                                    </span>
+                                    @if (o.IsRecurringGenerated)
+                                    {
+                                        <span class="badge text-bg-secondary ms-1">Auto</span>
+                                    }
+                                </td>
+
+                                <!-- EMAIL -->
+                                <td>
+                                    @if (o.Shipping?.Email != null)
+                                    {
+                                        @o.Shipping.Email
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">
+                                            No shipping info
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <!-- ACTIONS -->
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end align-items-center gap-1">
+
+                                        @if (o.Status != OrderStatus.Progress && o.Status != OrderStatus.Draft)
+                                        {
+                                            <a asp-action="Details"
+                                               asp-route-id="@o.Id"
+                                               class="btn btn-sm btn-outline-secondary text-decoration-none">
+                                                View
+                                            </a>
+                                        }
+
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light border-0"
+                                                    type="button"
+                                                    data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+
+                                            <ul class="dropdown-menu dropdown-menu-end">
+
+                                                @if (o.Status == OrderStatus.Progress)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           asp-controller="Shipping"
+                                                           asp-action="Create"
+                                                           asp-route-orderId="@o.Id">
+                                                            <i class="bi bi-truck me-2"></i>
+                                                            Enter Shipping
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                @if (o.Status != OrderStatus.Progress && o.Status != OrderStatus.Draft)
+                                                {
+                                                    <!-- ORDER AGAIN -->
+                                                    <li>
+                                                        <form asp-action="Reorder"
+                                                              asp-route-id="@o.Id"
+                                                              method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <button type="submit"
+                                                                    class="dropdown-item"
+                                                                    title="Add same items and order immediately">
+                                                                <i class="bi bi-arrow-repeat me-2"></i>
+                                                                Order Again
+                                                            </button>
+                                                        </form>
+                                                    </li>
+
+                                                    <!-- AUTO ORDER -->
+@*                                                     <li>
+                                                        <a class="dropdown-item"
+                                                           asp-controller="RecurringOrder"
+                                                           asp-action="Create"
+                                                           asp-route-orderId="@o.Id"
+                                                           title="Automatically create future orders">
+                                                            <i class="bi bi-clock-history me-2"></i>
+                                                            Auto Order
+                                                        </a>
+                                                    </li>
+
+                                                    <!-- MANAGE SCHEDULE -->
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           asp-controller="RecurringOrder"
+                                                           asp-action="Index"
+                                                           asp-route-orderId="@o.Id">
+                                                            <i class="bi bi-calendar-event me-2"></i>
+                                                            Manage Schedule
+                                                        </a>
+                                                    </li> *@
+                                                }
+
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .btn.text-decoration-none,
+    .btn.text-decoration-none:hover {
+        text-decoration: none !important;
+    }
+</style>

@@ -1,0 +1,124 @@
+@model PontelloApp.Models.Order
+
+@{
+    ViewData["Title"] = "Rejected Order";
+}
+
+<div class="container py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold text-danger mb-1">Rejected Order</h2>
+            <div class="text-muted small">
+                PO#: <strong>@Model.PONumber</strong> • Created @Model.CreatedAt.ToString("f")
+            </div>
+        </div>
+
+        <a asp-action="ExportOrderPO"
+           asp-route-id="@Model.Id"
+           class="btn btn-outline-secondary">
+            Download PO
+        </a>
+
+    </div>
+
+    <!-- ALERT -->
+    <div class="alert alert-danger">
+        This order has been rejected.<br />
+        <strong>Reason:</strong>
+        @(!string.IsNullOrEmpty(Model.RejectReason)
+                ? Model.RejectReason
+                : "No rejection reason recorded.")
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ORDER ITEMS -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-semibold">Order Items</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Variant</th>
+                                <th>Unit Price</th>
+                                <th>Qty</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.Product?.ProductName</td>
+                                    <td class="text-muted small">
+                                        @if (item.ProductVariant?.Options?.Any() == true)
+                                        {
+                                            @string.Join(" • ", item.ProductVariant.Options.Select(o => $"{o.Name}: {o.Value}"))
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>$@item.UnitPrice.ToString("F2")</td>
+                                    <td>@item.Quantity</td>
+                                    <td class="text-end fw-semibold">$@item.TotalPrice.ToString("F2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="col-lg-4">
+
+            <!-- ORDER SUMMARY -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-semibold">Order Summary</div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>$@Model.Items.Sum(i => i.TotalPrice).ToString("F2")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax (13%)</span>
+                        <span>$@Model.TaxAmount.ToString("F2")</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total</span>
+                        <span>$@Model.TotalAmount.ToString("F2")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHIPPING INFO -->
+            @if (Model.Shipping != null)
+            {
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-white fw-semibold">Shipping Information</div>
+                    <div class="card-body small">
+                        <div class="fw-semibold">@Model.Shipping.FullName</div>
+                        <div class="text-muted">@Model.Shipping.FullAddress</div>
+                        <div class="text-muted mt-2">Phone: @Model.Shipping.Phone</div>
+                        <div class="text-muted">Email: @Model.Shipping.Email</div>
+                        @if (!string.IsNullOrWhiteSpace(Model.Shipping.BinOrEin))
+                        {
+                            <div class="text-muted mt-2">BIN / EIN: @Model.Shipping.BinOrEin</div>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

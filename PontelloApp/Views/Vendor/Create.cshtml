@@ -1,0 +1,75 @@
+﻿@model PontelloApp.Models.Vendor
+
+<div class="mb-1">
+    <partial name="_BackToList" />
+</div>
+
+<h1 class="text-center mb-4">Create Vendor</h1>
+
+<div class="card shadow-sm p-4 mb-4" style="max-width: 900px; margin: auto;">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">
+                        Vendor Name
+                        <i class="bi bi-info-circle text-primary"
+                           data-bs-toggle="tooltip"
+                           title="Legal or trade name of the vendor."></i>
+                    </label>
+                    <input asp-for="Name" class="form-control" placeholder="Vendor name..." />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ContactName" class="form-label">
+                        Contact Name
+                        <i class="bi bi-info-circle text-primary"
+                           data-bs-toggle="tooltip"
+                           title="Primary contact person for this vendor."></i>
+                    </label>
+                    <input asp-for="ContactName" class="form-control" placeholder="Contact person..." />
+                    <span asp-validation-for="ContactName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="email@example.com" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label asp-for="Phone" class="form-label">Phone</label>
+                    <input asp-for="Phone" class="form-control" placeholder="10-digit phone number" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-gray">Save Changes</button>
+                </div>
+
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Enable Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

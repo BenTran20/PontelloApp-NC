@@ -1,0 +1,201 @@
+@model PontelloApp.Models.User
+@using Microsoft.AspNetCore.Identity
+@using PontelloApp.Models
+
+@inject RoleManager<IdentityRole> RoleManager
+
+@{
+    ViewData["Title"] = Model.Status == AccountStatus.Pending ? "Review Account" : "Edit User";
+    var allRoles = ViewBag.AllRoles as List<string> ?? new List<string>();
+    var userRoles = ViewBag.UserRoles as IList<string> ?? new List<string>();
+}
+
+<div class="container-fluid py-4" style="max-width: 960px;">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-semibold mb-1 fs-4">
+                @(Model.Status == AccountStatus.Pending ? "Review account" : "Edit user")
+            </h2>
+            <p class="text-muted mb-0 fs-7">@Model.Email</p>
+        </div>
+        <a asp-action="Accounts" class="btn btn-sm btn-outline-secondary">← Back to Accounts</a>
+    </div>
+
+    <!-- Success message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show fs-7" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Error message (from TempData) -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show fs-7" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Validation errors -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger fs-7">
+            <ul class="mb-0">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <!-- Personal details card -->
+    <div class="card border shadow-sm mb-3">
+        <div class="card-body">
+            <p class="text-uppercase fw-semibold mb-3 fs-7 text-secondary">Personal details</p>
+            <form asp-action="EditUser" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fs-7 fw-semibold">First name</label>
+                        <input type="text" name="firstName" class="form-control" value="@Model.FirstName" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fs-7 fw-semibold">Last name</label>
+                        <input type="text" name="lastName" class="form-control" value="@Model.LastName" required />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fs-7 fw-semibold">Email</label>
+                        <input type="email" name="email" class="form-control" value="@Model.Email" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fs-7 fw-semibold">Phone</label>
+                        <input type="text" name="phone" class="form-control" value="@Model.PhoneNumber" />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fs-7 fw-semibold">BIN / EIN</label>
+                        <input type="text" name="BINorEIN" class="form-control" value="@Model.BINorEIN" />
+                    </div>
+                </div>
+
+                <!-- Role selection -->
+                <hr class="my-4" />
+                <p class="text-uppercase fw-semibold mb-3 fs-7 text-secondary">Role</p>
+
+                <select name="roles" class="form-select" multiple size="4">
+                    @foreach (var role in allRoles)
+                    {
+                        if (userRoles.Contains(role))
+                        {
+                            <option value="@role" selected>@role</option>
+                        }
+                        else
+                        {
+                            <option value="@role">@role</option>
+                        }
+                    }
+                </select>
+                <p class="text-muted mt-1 mb-0 fs-8">Hold Ctrl / Cmd to select multiple roles.</p>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a asp-controller="Account" asp-action="Accounts" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-dark">
+                        Save changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Account status card -->
+    <div class="card border shadow-sm mb-3">
+        <div class="card-body">
+            <p class="text-uppercase fw-semibold mb-3 fs-7 text-secondary">Account status</p>
+
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                <!-- Current status badge -->
+                <div class="d-flex align-items-center gap-2">
+                    @switch (Model.Status)
+                    {
+                        case AccountStatus.Pending:
+                            <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">Pending approval</span>
+                            <span class="text-muted fs-8">Registered but not yet approved</span>
+                            break;
+                        case AccountStatus.Active:
+                            <span class="badge rounded-pill bg-success fs-6 px-3 py-2">Active</span>
+                            <span class="text-muted fs-8">This account can sign in</span>
+                            break;
+                        case AccountStatus.Inactive:
+                            <span class="badge rounded-pill bg-secondary fs-6 px-3 py-2">Inactive</span>
+                            <span class="text-muted fs-8">This account has been deactivated</span>
+                            break;
+                        case AccountStatus.Rejected:
+                            <span class="badge rounded-pill bg-danger fs-6 px-3 py-2">Rejected</span>
+                            <span class="text-muted fs-8">This account was rejected at registration</span>
+                            break;
+                    }
+                </div>
+
+                <!-- Action buttons -->
+                <div class="d-flex gap-2">
+                    @if (Model.Status == AccountStatus.Pending)
+                    {
+                        <form asp-action="ApprovePendingConfirmed" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success btn-sm px-3">Approve</button>
+                        </form>
+                        <form asp-action="RejectPendingConfirmed" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm px-3">Reject</button>
+                        </form>
+                    }
+                    else if (Model.Status == AccountStatus.Active || Model.Status == AccountStatus.Inactive)
+                    {
+                        <form asp-action="ToggleActiveInactive" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm px-3 @(Model.Status == AccountStatus.Active ? "btn-outline-warning" : "btn-outline-success")">
+                                @(Model.Status == AccountStatus.Active ? "Deactivate" : "Activate")
+                            </button>
+                        </form>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Status transition hint -->
+    <p class="text-muted mb-0 fs-8">
+        Status flow: <strong>Pending</strong> → Approve → <strong>Active</strong> &nbsp;·&nbsp; Reject → <strong>Rejected</strong> &nbsp;·&nbsp; Active ↔ <strong>Inactive</strong>
+    </p>
+
+</div>
+
+<script>
+    setTimeout(function () {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alert) {
+            alert.classList.remove('show');
+            alert.classList.add('fade');
+            setTimeout(() => alert.remove(), 500); 
+        });
+    }, 5000); // 5s
+</script>

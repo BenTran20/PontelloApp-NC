@@ -1,0 +1,30 @@
+﻿@{
+    if (ViewData.ContainsKey("ControllerName"))
+    {
+        if (ViewData.ContainsKey("returnURL"))
+        {
+            <a href='@ViewData["returnURL"]' class="btn btn-outline-secondary btn-sm">
+                <em class="bi bi-arrow-left"></em> Back to @ViewData["ControllerFriendlyName"]s
+            </a>
+        }
+        else
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm"> <em class="bi bi-arrow-left"></em> Back to @ViewData["ControllerFriendlyName"]s</a>
+        }
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"> <em class="bi bi-arrow-left"></em> Back to List</a>
+    }
+
+}
+@* Find/Replace all
+
+<a_asp-action="Index">Back to List</a>
+   Note: added the _ in '<a_' to avoid having this comment replaced
+
+with
+
+<partial name="_BackToList" />
+
+*@

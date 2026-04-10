@@ -1,0 +1,74 @@
+@model IEnumerable<PontelloApp.Models.Vendor>
+
+@{
+    ViewData["Title"] = "Vendors";
+}
+
+<a asp-action="Index" asp-controller="Product" class="btn btn-outline-secondary btn-sm">
+    <em class="bi bi-arrow-left"></em> Back to Products
+</a>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="m-0">Vendors</h1>
+    <div>
+        <a asp-action="Create" class="btn btn-primary me-2">
+            <em class="bi bi-plus-lg"></em> New Vendor
+        </a>
+        <a asp-action="Archived" class="btn btn-outline-secondary">
+            <em class="bi bi-archive"></em> Archived Vendors
+        </a>
+    </div>
+</div>
+
+<table class="table table-hover table-striped shadow-sm align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Name</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var vendor in Model)
+        {
+            <tr>
+                <td>@vendor.Name</td>
+                <td>@vendor.ContactName</td>
+                <td>@vendor.Email</td>
+                <td>@vendor.Phone</td>
+                <td class="text-end">
+                    <a asp-action="Edit" asp-route-id="@vendor.VendorID"
+                       class="btn btn-sm btn-primary me-1"
+                       data-bs-toggle="tooltip" data-bs-placement="top"
+                       title="Edit vendor">
+                        <em class="bi bi-pencil-fill"></em> Edit
+                    </a>
+                    <a asp-controller="VendorProduct" asp-action="Index"
+                       asp-route-vendorId="@vendor.VendorID"
+                       class="btn btn-sm btn-secondary me-1"
+                       data-bs-toggle="tooltip" data-bs-placement="top"
+                       title="View vendor details">
+                        <em class="bi bi-info-circle-fill"></em> Details
+                    </a>
+                    <a asp-action="Archive" asp-route-id="@vendor.VendorID"
+                       class="btn btn-sm btn-danger"
+                       data-bs-toggle="tooltip" data-bs-placement="top"
+                       title="Archive vendor">
+                        <em class="bi bi-archive-fill"></em> Archive
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+}

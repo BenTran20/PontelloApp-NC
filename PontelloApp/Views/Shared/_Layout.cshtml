@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PontelloApp</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PontelloApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/custom.css" />
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css" />
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center"
+                   asp-area=""
+                   asp-controller="@(User.IsInRole("Admin") ? "Product" : "ProductDealer")"
+                   asp-action="@(User.IsInRole("Admin") ? "Index" : "Index")">
+                    <img src="~/Images/pontello-Imports-Logo.png"
+                         alt="Pontello Logo"
+                         height="40"
+                         class="me-2" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Products</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Dealer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="ProductDealer" asp-action="Index">Products</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Dealer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">History</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Admin">Order management</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Accounts">Account management</a>
+                            </li>
+                        }
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - PontelloApp
+            @*             <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color:#0246AC">Privacy</a>*@        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/introTour.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .build();
+
+    connection.on("ReceiveNotification", (notification) => {
+        // show toast
+        const toastHtml = `<div class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${notification.title}: ${notification.message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML("beforeend", toastHtml);
+        const toastEl = document.querySelector(".toast:last-child");
+        new bootstrap.Toast(toastEl, { delay: 5000 }).show();
+
+        // update bell unread count
+        const badge = document.querySelector("#notificationDropdown .badge");
+        if(badge) {
+            let count = parseInt(badge.textContent);
+            badge.textContent = count + 1;
+        }
+    });
+
+    connection.start().catch(err => console.error(err.toString()));
+</script>

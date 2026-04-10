@@ -1,0 +1,191 @@
+@model PontelloApp.Models.Product
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <partial name="_BackToList"/>
+
+    <a asp-controller="AddProductVariant"
+       asp-action="Index"
+       asp-route-id="@Model.ID"
+       class="btn btn-primary btn-sm">
+        Manage Variants
+    </a>
+</div>
+
+<h1 class="mb-4">@Model.ProductName</h1>
+
+<div class="row">
+    <!-- PRODUCT INFO -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold bg-light">
+            Product Information
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Handle</small>
+                    <div class="fw-semibold">@Model.Handle</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Status</small>
+                    <div>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Archived</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Vendor</small>
+                    <div class="fw-semibold">@Model.Vendor?.Name</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Category</small>
+                    <div class="fw-semibold">@Model.Category?.FullCategory</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Type</small>
+                    <div class="fw-semibold">@Model.Type</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Tags</small>
+                    <div class="fw-semibold">@Model.Tag</div>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Visibility</small>
+                    <div>
+                        @if (Model.IsUnlisted)
+                        {
+                            <span class="badge bg-warning text-dark">Unlisted</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-info text-dark">Public</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted text-uppercase">Tax Status</small>
+                    <div>
+                        @if (Model.IsTaxable)
+                        {
+                            <span class="badge bg-success">Taxable</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Non-Taxable</span>
+                        }
+                    </div>
+                </div>
+                
+
+            </div>
+
+            <hr class="my-4" />
+
+            <div>
+                <small class="text-muted text-uppercase">Description</small>
+                <div class="mt-2">
+                    @Html.Raw(Model.Description)
+                </div>
+            </div>
+
+            @if (Model.IsUnlisted)
+            {
+                <div class="alert alert-warning mt-3 mb-0">
+                    <strong>Note:</strong> This product is marked as <em>Unlisted</em>. Unlisted products are hidden from public listings and storefront search results — they are accessible only by direct link or through admin/dealer areas.
+                </div>
+            }
+            else
+            {
+                <div class="small text-muted mt-3">This product is visible in public listings and storefronts.</div>
+            }
+
+        </div>
+    </div>
+
+    <!-- VARIANTS -->
+
+        <div class="card shadow">
+            <div class="card-header fw-bold d-flex justify-content-between">
+                Variants
+                <span class="text-muted small">
+                    @Model.Variants?.Count() total
+                </span>
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SKU</th>
+                            <th>Options</th>
+                            <th>Stock Price</th>
+                            <th>Cost Price</th>
+                            <th>Compare</th>
+                            <th>Stock</th>
+                            <th>Weight</th>
+                            <th>Policy</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var v in Model.Variants ?? Enumerable.Empty<PontelloApp.Models.ProductVariant>())
+                        {
+                            <tr>
+                                <td><strong>@v.SKU_ExternalID</strong></td>
+
+                                <td>
+                                    @string.Join(", ",
+                                    v.Options?.Select(o => $"{o.Name}: {o.Value}")
+                                    ?? new List<string>())
+                            </td>
+
+                            <td>@v.UnitPrice.ToString("C")</td>
+                            <td>
+                            @(v.CostPrice.HasValue ? v.CostPrice.Value.ToString("C")
+                                                        : "-")
+                            </td>
+
+                            <td>
+                                @(v.CompareAtPrice.HasValue? v.CompareAtPrice.Value.ToString("C")
+                                                                : "-")
+                            </td>
+
+                                <td>@v.StockQuantity</td>
+
+                                <td>@v.Weight @v.Unit</td>
+
+                                <td>@v.InventoryPolicy</td>
+
+                                <td>
+                                @if (v.Status)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+</div>
+

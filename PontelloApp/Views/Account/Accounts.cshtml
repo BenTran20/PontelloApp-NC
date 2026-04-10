@@ -1,0 +1,202 @@
+@using Microsoft.AspNetCore.Identity
+@using PontelloApp.Models
+
+@model IEnumerable<PontelloApp.Models.User>
+@inject UserManager<PontelloApp.Models.User> UserManager
+
+@{
+    ViewData["Title"] = "Manage Accounts";
+    var userRoles = ViewBag.UserRoles as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var pendingUsers = ViewBag.PendingUsers as List<PontelloApp.Models.User> ?? new List<PontelloApp.Models.User>();
+
+    var allUsers = Model.ToList();
+    var inactiveUsers = allUsers.Where(u => u.Status == AccountStatus.Inactive).ToList();
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-semibold mb-0">Manage Accounts</h2>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <ul class="nav nav-tabs mb-3" id="accountsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">
+                All
+                <span class="badge bg-secondary ms-1">@allUsers.Count</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                Pending
+                <span class="badge bg-warning text-dark ms-1">@pendingUsers.Count</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="inactive-tab" data-bs-toggle="tab" data-bs-target="#inactive" type="button" role="tab">
+                Inactive
+                <span class="badge bg-secondary ms-1">@inactiveUsers.Count</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+
+        @* All users tab *@
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+            <div class="card border shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>BIN/EIN</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in allUsers)
+                            {
+                                <tr>
+                                    <td class="fw-medium">@user.FirstName @user.LastName</td>
+                                    <td class="text-muted">@user.Email</td>
+                                    <td class="text-muted">@user.PhoneNumber</td>
+                                    <td class="text-muted">@(string.IsNullOrEmpty(user.BINorEIN) ? "—" : user.BINorEIN)</td>
+                                    <td>@(userRoles.ContainsKey(user.Id) ? userRoles[user.Id] : "—")</td>
+                                    <td>
+                                        @switch (user.Status)
+                                        {
+                                            case AccountStatus.Pending:
+                                                <span class="badge rounded-pill bg-warning text-dark">Pending</span>
+                                                break;
+                                            case AccountStatus.Active:
+                                                <span class="badge rounded-pill bg-success">Active</span>
+                                                break;
+                                            case AccountStatus.Inactive:
+                                                <span class="badge rounded-pill bg-secondary">Inactive</span>
+                                                break;
+                                            case AccountStatus.Rejected:
+                                                <span class="badge rounded-pill bg-danger">Rejected</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (user.Status == AccountStatus.Pending)
+                                        {
+                                            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-primary">Review →</a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        @* Pending users tab *@
+        <div class="tab-pane fade" id="pending" role="tabpanel">
+            <div class="card border shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>BIN/EIN</th>
+                                <th>Role</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!pendingUsers.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No pending accounts</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var user in pendingUsers)
+                                {
+                                    <tr>
+                                        <td class="fw-medium">@user.FirstName @user.LastName</td>
+                                        <td class="text-muted">@user.Email</td>
+                                        <td class="text-muted">@user.PhoneNumber</td>
+                                        <td class="text-muted">@(string.IsNullOrEmpty(user.BINorEIN) ? "—" : user.BINorEIN)</td>
+                                        <td>@(userRoles.ContainsKey(user.Id) ? userRoles[user.Id] : "—")</td>
+                                        <td class="text-end">
+                                            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-primary">Review →</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        @* Inactive users tab *@
+        <div class="tab-pane fade" id="inactive" role="tabpanel">
+            <div class="card border shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>BIN/EIN</th>
+                                <th>Role</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!inactiveUsers.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No inactive accounts</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var user in inactiveUsers)
+                                {
+                                    <tr>
+                                        <td class="fw-medium">@user.FirstName @user.LastName</td>
+                                        <td class="text-muted">@user.Email</td>
+                                        <td class="text-muted">@user.PhoneNumber</td>
+                                        <td class="text-muted">@(string.IsNullOrEmpty(user.BINorEIN) ? "—" : user.BINorEIN)</td>
+                                        <td>@(userRoles.ContainsKey(user.Id) ? userRoles[user.Id] : "—")</td>
+                                        <td class="text-end">
+                                            <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

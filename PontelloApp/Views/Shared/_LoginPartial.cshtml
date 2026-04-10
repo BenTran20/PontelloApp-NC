@@ -1,0 +1,62 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <!-- Cart icon -->
+        @if (User.IsInRole("Dealer"))
+        {
+            <li class="nav-item ms-2">
+                <a class="nav-link position-relative" asp-controller="Cart" asp-action="Cart">
+                    <i class="bi bi-cart3 fs-4"></i>
+                    @await Component.InvokeAsync("CartCount")
+                </a>
+            </li>
+        }
+
+        <!-- Notification bell -->
+        <li class="nav-item ms-2 me-2">
+            @await Html.PartialAsync("_NotificationsBell")  <!-- partial view -->
+        </li>
+
+        <!-- Profile dropdown -->
+        <li class="nav-item dropdown me-3">
+            <a class="nav-link dropdown-toggle d-flex align-items-center"
+               href="#"
+               id="profileDropdown"
+               role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+                <i class="bi bi-person-circle fs-4 me-1"></i>
+                @User.Identity.Name
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                <li>
+                    <a class="dropdown-item" asp-controller="Account" asp-action="Profile">Profile</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-controller="Account" asp-action="Settings">Settings</a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider" />
+                </li>
+                <li>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                        <button type="submit" class="dropdown-item">Logout</button>
+                    </form>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+        </li>
+    }
+</ul>

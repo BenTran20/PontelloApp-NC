@@ -1,0 +1,149 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+@Html.AntiForgeryToken()
+
+@{
+    var notifications = ViewBag.Notifications as List<PontelloApp.Models.Notification> ?? new List<PontelloApp.Models.Notification>();
+    var unreadCount = notifications.Count(n => !n.IsRead);
+
+    string Truncate(string text, int maxLength) =>
+        string.IsNullOrEmpty(text) ? "" : (text.Length <= maxLength ? text : text.Substring(0, maxLength) + "…");
+
+}
+
+<div class="dropdown">
+    <a class="nav-link position-relative text-dark" href="#" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell fs-4"></i>
+        @if (unreadCount > 0)
+        {
+            <span class="position-absolute bg-danger border border-white rounded-circle"
+                  style="width: 10px; height: 10px; top: 8px; right: 7px;">
+                <span class="visually-hidden">New</span>
+            </span>
+        }
+    </a>
+
+    <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0" style="width: 360px; overflow: hidden;">
+
+        <div class="px-3 py-3 border-bottom d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 fw-bold">Notification</h4>
+            @if (unreadCount > 0)
+            {
+                <button class="btn btn-sm btn-link mark-all-btn"
+                        data-url="@Url.Action("MarkAllAsRead", "Notification")">
+                    Mark all as Read
+                </button>
+            }
+        </div>
+
+        <div style="max-height: 380px; overflow-y: auto;">
+            @if (notifications.Any())
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var n in notifications.OrderByDescending(x => x.CreatedAt))
+                    {
+                        <div class="list-group-item list-group-item-action border-0 notification-item @(!n.IsRead ? "bg-light" : "")">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1 me-2">
+                                    <a href="@n.Link" class="text-decoration-none text-dark">
+                                        <div class="fw-bold mb-1" style="font-size: 0.9rem; line-height: 1.2;">@n.Title</div>
+                                        <div class="text-secondary mb-1" style="font-size: 0.85rem;">@Truncate(n.Message, 80)</div>
+                                        <div class="text-muted small" style="font-size: 0.75rem;">
+                                            <i class="bi bi-clock me-1"></i>@n.CreatedAt.ToString("g")
+                                        </div>
+                                    </a>
+                                </div>
+
+                                @if (!n.IsRead)
+                                {
+                                    <button class="btn p-0 mark-read-btn" data-id="@n.Id" title="Mark as Read">
+                                        <i class="bi bi-circle-fill text-primary" style="font-size: 0.6rem;"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-bell-slash text-muted fs-2"></i>
+                    <p class="text-muted small mt-2">No notification.</p>
+                </div>
+            }
+        </div>
+
+        <a href="@Url.Action("Index", "Notification")" class="dropdown-item text-center py-2 border-top small fw-bold text-primary">
+            View All
+        </a>
+    </div>
+</div>
+
+    <script>
+        document.addEventListener('click', async function (e) {
+
+            if (e.target && e.target.classList.contains('mark-all-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const btn = e.target;
+                const url = btn.dataset.url; 
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (response.ok) {
+                        document.querySelectorAll('.mark-read-btn').forEach(b => b.remove());
+                        document.querySelectorAll('.notification-item').forEach(item => {
+                            item.classList.remove('bg-light');
+                        });
+
+                        const badge = document.querySelector('.bg-danger');
+                        if (badge) badge.style.display = 'none';
+
+                        document.querySelectorAll('.mark-all-btn').forEach(b => b.remove());
+                    }
+                } catch (err) {
+                    console.error("Error:", err);
+                }
+            }
+
+            if (e.target && (e.target.classList.contains('mark-read-btn') || e.target.closest('.mark-read-btn'))) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const btn = e.target.classList.contains('mark-read-btn') ? e.target : e.target.closest('.mark-read-btn');
+                const id = btn.dataset.id;
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                try {
+                    const response = await fetch(`/Notification/MarkAsRead/${id}`, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+
+                    if (response.ok) {
+                        const item = btn.closest('.notification-item');
+                        if (item) item.classList.remove('bg-light');
+                        btn.remove();
+
+                        if (document.querySelectorAll('.mark-read-btn').length === 0) {
+                            document.querySelectorAll('.mark-all-btn').forEach(b => b.remove());
+                            const badge = document.querySelector('.bg-danger');
+                            if (badge) badge.style.display = 'none';
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error:", err);
+                }
+            }
+        });
+    </script>

@@ -1,0 +1,72 @@
+@model IEnumerable<PontelloApp.Models.Category>
+
+@{
+    // Use a unique parent accordion container ID if not passed
+    var parentId = ViewData["ParentContainerId"] ?? "rootAccordion";
+}
+
+<ul class="list-group ms-4 mt-2">
+    @foreach (var cat in Model)
+    {
+        var collapseId = "catCollapse" + cat.ID;
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    @if (cat.SubCategories.Any())
+                    {
+                        <button class="btn btn-sm btn-outline-secondary me-2"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#@collapseId"
+                                aria-expanded="false"
+                                aria-controls="@collapseId">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    }
+                    @cat.Name
+                </div>
+
+                <div>
+                    <a asp-action="Create" asp-route-parentId="@cat.ID"
+                       class="btn btn-sm btn-outline-secondary icon-btn me-1"
+                       title="Add subcategory under @cat.Name">
+                        <i class="bi bi-plus"></i>
+                        <span class="btn-text">Subcategory</span>
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@cat.ID"
+                       class="btn btn-sm btn-outline-primary me-1">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+
+                    @if (!cat.SubCategories.Any() && (cat.Products == null || !cat.Products.Any()))
+                    {
+                        <a asp-action="Delete" asp-route-id="@cat.ID"
+                           class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash3"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <span data-bs-toggle="tooltip" title="Cannot delete. Contains subcategories or products.">
+                            <button class="btn btn-sm btn-outline-danger" disabled>
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </span>
+                    }
+                </div>
+            </div>
+
+            @* Subcategories collapsible *@
+            @if (cat.SubCategories.Any())
+            {
+                <div class="collapse mt-2 ms-4" id="@collapseId" data-bs-parent="#@parentId">
+                    @{
+                        // Pass a unique accordion container ID for the next level
+                        ViewData["ParentContainerId"] = "accordion" + cat.ID;
+                    }
+                    <partial name="_CategoryTree" model="cat.SubCategories" />
+                </div>
+            }
+        </li>
+    }
+</ul>

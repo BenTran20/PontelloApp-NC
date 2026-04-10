@@ -1,0 +1,255 @@
+@model PontelloApp.Models.Order
+
+@{
+    ViewData["Title"] = "Shipped Order";
+}
+
+<div class="container py-4">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold text-primary mb-1">Shipped Order</h2>
+
+            <div class="text-muted small">
+                PO#: <strong>@Model.PONumber</strong>
+                • Created @Model.CreatedAt.ToString("f")
+            </div>
+        </div>
+
+        <a asp-action="ExportOrderPO"
+           asp-route-id="@Model.Id"
+           class="btn btn-outline-secondary">
+            Download PO
+        </a>
+
+    </div>
+
+
+    <!-- STATUS -->
+    <div class="alert alert-primary mb-4">
+        This order has been shipped.
+    </div>
+
+
+    <!-- SHIPPING + SHIPMENT -->
+    @if (Model.Shipping != null)
+    {
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-header bg-white fw-semibold">
+                Shipping 
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-4">
+
+                    <!-- SHIPPING INFO -->
+                    <div class="col-md-6 border-md-end">
+
+                        <div class="fw-semibold">
+                            @Model.Shipping.FullName
+                        </div>
+
+                        <div class="text-muted mt-1">
+                            @Model.Shipping.FullAddress
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Shipping.BinOrEin))
+                        {
+                            <div class="text-muted mt-2">
+                                BIN / EIN: @Model.Shipping.BinOrEin
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Shipping.DeliveryNotes))
+                        {
+                            <div class="mt-3">
+
+                                <div class="fw-semibold small">
+                                    Delivery Instructions
+                                </div>
+
+                                <div class="text-muted">
+                                    @Model.Shipping.DeliveryNotes
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+
+
+                    <!-- SHIPMENT DETAILS -->
+                    <div class="col-md-6">
+
+                        @if (!string.IsNullOrEmpty(Model.Shipping.TrackingNumber))
+                        {
+                            <div class="mb-3">
+
+                                <div class="text-muted small">
+                                    Tracking Number
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @Model.Shipping.TrackingNumber
+                                </div>
+
+                            </div>
+                        }
+
+                        @if (Model.Shipping?.ShippingCost != null)
+                        {
+                            <div>
+
+                                <div class="text-muted small">
+                                    Shipping Cost
+                                </div>
+
+                                <div class="fw-semibold">
+                                    $@Model.Shipping.ShippingCost?.ToString("F2")
+                                </div>
+
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- ITEMS + SUMMARY -->
+    <div class="row g-4">
+
+        <!-- ORDER ITEMS -->
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white fw-semibold">
+                    Order Items
+                </div>
+
+                <div class="card-body p-0">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Variant</th>
+                                <th>Unit Price</th>
+                                <th>Qty</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+
+                                    <td class="fw-semibold">
+                                        @item.Product?.ProductName
+                                    </td>
+
+                                    <td class="text-muted small">
+
+                                        @if (item.ProductVariant?.Options?.Any() == true)
+                                        {
+                                            @string.Join(" • ",
+                                            item.ProductVariant.Options
+                                            .Select(o => $"{o.Name}: {o.Value}"))
+                                                                        }
+                                        else
+                                        {
+                                            <span>—</span>
+                                        }
+
+                                    </td>
+
+                                    <td>$@item.UnitPrice</td>
+
+                                    <td>@item.Quantity</td>
+
+                                    <td class="text-end fw-semibold">
+                                        $@item.TotalPrice
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ORDER SUMMARY -->
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white fw-semibold">
+                    Order Summary
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>$@Model.Items.Sum(i => i.TotalPrice).ToString("0.00")</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax (13%)</span>
+                        <span>$@Model.TaxAmount.ToString("0.00")</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping</span>
+                        <span>
+                            @if (Model.Shipping?.ShippingCost == null)
+                            {
+                                <span class="text-muted">Not charged</span>
+                            }
+                            else if (Model.Shipping.ShippingCost == 0)
+                            {
+                                <span class="text-success">Free</span>
+                            }
+                            else
+                            {
+                                @($"${Model.Shipping.ShippingCost?.ToString("0.00")}")
+                            }
+                        </span>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total</span>
+                        <span>$@Model.TotalAmount.ToString("0.00")</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    ```
+
+</div>

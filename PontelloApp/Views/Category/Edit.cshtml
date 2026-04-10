@@ -1,0 +1,52 @@
+﻿@model PontelloApp.Models.Category
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="mb-1">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <em class="bi bi-arrow-left"></em> Back to Categories
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    @if (Model.ParentCategoryID == null)
+    {
+        <h1>Edit @ViewBag.FullCategory Category</h1>
+    }
+    else
+    {
+        <h1>Edit @ViewBag.FullCategory SubCategory</h1>
+    }
+    <hr />
+
+    <div class="col-md-7">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="ID" />
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Enter category name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 d-flex justify-content-start">
+                <input type="submit" value="Save Changes" class="btn btn-gray" />
+            </div>
+
+            <div class="mt-3">
+                <a asp-action="Index" class="text-decoration-none">&larr; Back to Category List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

@@ -1,0 +1,165 @@
+@using PontelloApp.ViewModels
+@model RegisterVM
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container py-2" style="max-width: 680px;">
+
+    <div class="border-bottom border-dark border-2 pb-3 mb-4">
+        <h1 class="fw-semibold mb-1">Create an account</h1>
+        <span class="text-muted">Already have one? <a asp-controller="Account" asp-action="Login" class="signincolor">Sign in</a></span>
+    </div>
+
+    <form asp-action="Register" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <!--PERSONAL-->
+        <div class="card border mb-3">
+            <div class="card-body">
+                <h4>Personal Details</h4>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" placeholder="John" />
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" placeholder="Smith" />
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="john@company.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" placeholder="416-555-0100" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--COMPANY-->
+        <div class="card border mb-3">
+            <div class="card-body">
+                <h4>Company</h4>
+                <div class="row g-3">
+                    <div class="col-sm-8">
+                        <label asp-for="CompanyName" class="form-label"></label>
+                        <input asp-for="CompanyName" class="form-control" placeholder="Acme Dealership Inc." />
+                        <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-4">
+                        <label asp-for="BINorEIN" class="form-label">
+                            BIN / EIN <span class="text-muted fw-normal">(optional)</span>
+                        </label>
+                        <input asp-for="BINorEIN" class="form-control" placeholder="12-3456789" />
+                        <div class="form-text">Marks account as tax-exempt.</div>
+                        <span asp-validation-for="BINorEIN" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--ADDRESS-->
+        <div class="card border mb-3">
+            <div class="card-body">
+                <h4>Shipping / Billing Address</h4>
+
+                <div class="mb-3">
+                    <label asp-for="AddressLine1" class="form-label"></label>
+                    <input asp-for="AddressLine1" class="form-control" placeholder="123 Main Street" />
+                    <span asp-validation-for="AddressLine1" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="AddressLine2" class="form-label"></label>
+                    <input asp-for="AddressLine2" class="form-control" placeholder="Suite 400" />
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-5">
+                        <label asp-for="City" class="form-label"></label>
+                        <input asp-for="City" class="form-control" placeholder="Toronto" />
+                        <span asp-validation-for="City" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-4">
+                        <label asp-for="Province" class="form-label"></label>
+                        <input asp-for="Province" class="form-control" placeholder="ON" />
+                        <span asp-validation-for="Province" class="text-danger small"></span>
+                    </div>
+                    <div class="col-sm-3">
+                        <label asp-for="PostalCode" class="form-label"></label>
+                        <input asp-for="PostalCode" class="form-control" placeholder="M5V 1A1" />
+                        <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-5">
+                        <label asp-for="Country" class="form-label"></label>
+                        <select asp-for="Country" class="form-select">
+                            <option value="Canada">Canada</option>
+                            <option value="United States">United States</option>
+                        </select>
+                        <span asp-validation-for="Country" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--PASSWORD-->
+        <div class="card border mb-4">
+            <div class="card-body">
+                <h4>Password</h4>
+
+                <div class="row g-3">
+                    <!-- Password -->
+                    <div class="col-sm-6">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" type="password" class="form-control" />
+
+                        <!-- Password requirements -->
+                        <div class="form-text small mt-2">
+                            <i class="bi bi-shield-lock me-1"></i>
+                            Your password should include:
+                            <ul class="mb-0 mt-1 ps-3">
+                                <li>6+ characters</li>
+                                <li>Uppercase & lowercase letters</li>
+                                <li>At least one number</li>
+                                <li>At least one special character</li>
+                            </ul>
+                        </div>
+
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="col-sm-6">
+                        <label asp-for="ConfirmedPassword" class="form-label"></label>
+                        <input asp-for="ConfirmedPassword" type="password" class="form-control" />
+                        <span asp-validation-for="ConfirmedPassword" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100 py-2 mb-3">Create account</button>
+
+        <p class="text-center text-muted mb-0" style="font-size: 0.88rem;">
+            By registering you agree to our terms of service. &nbsp;·&nbsp;
+            <a asp-controller="Home" asp-action="Index" class="text-muted">Back to home</a>
+        </p>
+
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

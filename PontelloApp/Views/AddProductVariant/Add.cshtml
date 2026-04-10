@@ -1,0 +1,248 @@
+@using PontelloApp.Ultilities
+@model PontelloApp.Models.ProductVariant
+
+@{
+    ViewData["Title"] = "Add Product Variant";
+}
+
+<div class="mb-1">
+    <a asp-action="Index" asp-route-id="@Model.ProductId" class="btn btn-outline-secondary btn-sm">
+        <em class="bi bi-arrow-left"></em> Back to Products
+    </a>
+</div>
+
+<h1>Add Variant for @ViewBag.Product?.ProductName</h1>
+
+<form asp-action="Add" method="post">
+    <input type="hidden" asp-for="ProductId" />
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-6">
+            <!-- SKU -->
+            <div class="mb-3">
+                <label asp-for="SKU_ExternalID" class="form-label">
+                    SKU
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="External product code for each variant."></i>
+                </label>
+                <input asp-for="SKU_ExternalID" list="SKUList" class="form-control" placeholder="Enter SKU" />
+                <datalist id="SKUList">
+                    <option value="1150"></option>
+                </datalist>
+                <span asp-validation-for="SKU_ExternalID" class="text-danger"></span>
+            </div>
+
+            <!-- Unit Price -->
+            <div class="mb-3">
+                <label asp-for="UnitPrice" class="form-label">
+                    Unit Price
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Price for each variant, max 2 decimal places."></i>
+                </label>
+                <input asp-for="UnitPrice" type="text" list="UnitPriceList" class="form-control" placeholder="0.00" inputmode="decimal"
+                       oninput="this.value = this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                <datalist id="UnitPriceList">
+                    <option value="0.50"></option>
+                </datalist>
+            </div>
+
+            <!-- Cost Price -->
+            <div class="mb-3">
+                <label asp-for="CostPrice" class="form-label">
+                    Cost Price
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Optional: cost to acquire this variant, max 2 decimal places."></i>
+                </label>
+                <input asp-for="CostPrice" type="text" list="CostPriceList" class="form-control" placeholder="0.00" inputmode="decimal"
+                       oninput="this.value = this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                <span asp-validation-for="CostPrice" class="text-danger"></span>
+                <datalist id="CostPriceList">
+                    <option value="1.00"></option>
+                </datalist>
+            </div>
+
+            <!-- Compare At Price -->
+            <div class="mb-3">
+                <label asp-for="CompareAtPrice" class="form-label">
+                    Compare At Price
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Optional: Original price for comparison, max 2 decimal places."></i>
+                </label>
+                <input asp-for="CompareAtPrice" type="text" list="CompareAtPriceList" class="form-control" placeholder="0.00" inputmode="decimal"
+                       oninput="this.value = this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                <span asp-validation-for="CompareAtPrice" class="text-danger"></span>
+                <datalist id="CompareAtPriceList">
+                    <option value="1.25"></option>
+                </datalist>
+            </div>
+
+            <!-- Stock Quantity -->
+            <div class="mb-3">
+                <label asp-for="StockQuantity" class="form-label">
+                    Stock Quantity
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Number of items currently in stock."></i>
+                </label>
+                <input asp-for="StockQuantity" type="number" list="StockQuantityList" class="form-control" placeholder="0" />
+                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                <datalist id="StockQuantityList">
+                    <option value="5"></option>
+                </datalist>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-6">
+            <!-- Weight -->
+            <div class="mb-3">
+                <label asp-for="Weight" class="form-label">
+                     Size
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Optional: Weight in kg."></i>
+                </label>
+                <input asp-for="Weight" type="text" list="WeightList" class="form-control" placeholder="0.0000000" inputmode="decimal"
+                       oninput="this.value = this.value.match(/^\d*(\.?\d{0,7})/)[0];" />
+                @Html.DropDownListFor(i => i.Unit,
+                    new SelectList(Enum.GetValues(typeof(ImperialUnits))),
+                    new { @class = "form-control" })
+                <span asp-validation-for="Weight" class="text-danger"></span>
+                <datalist id="WeightList">
+                    <option value="4989.51607"></option>
+                </datalist>
+
+            </div>
+
+            <!-- Barcode -->
+            <div class="mb-3">
+                <label asp-for="Barcode" class="form-label">
+                    Barcode
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Optional: Barcode for scanning."></i>
+                </label>
+                <input asp-for="Barcode" list="BarCodeList" class="form-control" placeholder="Enter barcode" />
+                <datalist id="BarCodeList">
+                    <option value="AX1150"></option>
+                </datalist>
+                <span asp-validation-for="Barcode" class="text-danger"></span>
+            </div>
+
+            <!-- Inventory Policy -->
+            <div class="mb-3">
+                <label asp-for="InventoryPolicy" class="form-label">
+                    Inventory Policy
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Inventory Policy Selection (Continue or Deny)."></i>
+                </label>
+                <select asp-for="InventoryPolicy" class="form-select"
+                        asp-items="Html.GetEnumSelectList<InventoryPolicy>()">
+                    <option value="">-- Select Policy --</option>
+                </select>
+                <span asp-validation-for="InventoryPolicy" class="text-danger"></span>
+            </div>
+
+            <!-- Status -->
+            <div class="form-check mb-3">
+                <input asp-for="Status" class="form-check-input" />
+                <label asp-for="Status" class="form-check-label">
+                    Active
+                    <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Active = available; Inactive = hidden."></i>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <!-- Options -->
+    <h2>
+        Options
+    </h2>
+    <p class="text-muted d-block mt-1">
+        Add variant options, e.g., Size: M; Color: Red. Click "Add Option" to add more rows.
+    </p>
+
+    <div class="text-danger mb-2">
+        @if (ViewData.ModelState.ContainsKey("Options") &&
+                ViewData.ModelState["Options"].Errors.Count > 0)
+        {
+            foreach (var err in ViewData.ModelState["Options"].Errors)
+            {
+                <div>@err.ErrorMessage</div>
+            }
+        }
+    </div>
+
+    <table class="table table-sm" id="optionsTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Value</th>
+                <th class="visually-hidden">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Options.Count; i++)
+            {
+                <tr>
+                    <td>
+                        <label asp-for="Options[i].Name" class="form-label"></label>
+                        <input asp-for="Options[i].Name" list="NameList" class="form-control" placeholder="e.g., Size" />
+                        <span asp-validation-for="Options[i].Name" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <label asp-for="Options[i].Value" class="form-label"></label>
+                        <input asp-for="Options[i].Value" list="ValueList" class="form-control" placeholder="e.g., M" />
+                        <span asp-validation-for="Options[i].Value" class="text-danger"></span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm removeOptionBtn" title="Remove Option">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <datalist id="NameList">
+        <option value="Color"></option>
+    </datalist>
+    <datalist id="ValueList">
+        <option value="Yellow"></option>
+    </datalist>
+
+    <button type="button" class="btn btn-secondary mb-3" id="addOptionBtn" title="Add Option">Add Option</button>
+
+    <div class="mt-4 d-flex justify-content-end">
+        <a asp-action="Index"
+           asp-route-id="@Model.ProductId"
+           class="btn btn-outline-secondary me-2">
+            Cancel
+        </a>
+
+        <button type="submit" class="btn btn-primary">
+            Save Variant
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // Enable Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Dynamic Options Table
+        let optionIndex = @Model.Options.Count;
+
+        document.getElementById('addOptionBtn').addEventListener('click', function () {
+            const tbody = document.querySelector('#optionsTable tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <input type="hidden" name="Options[${optionIndex}].Id" value="0" />
+                <td><input name="Options[${optionIndex}].Name" list="NameList" class="form-control" placeholder="e.g., Size" /></td>
+                <td><input name="Options[${optionIndex}].Value" list="ValueList" class="form-control" placeholder="e.g., M" /></td>
+                <td><button type="button" class="btn btn-danger btn-sm removeOptionBtn" title="Remove Option">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+            row.querySelector('.removeOptionBtn').addEventListener('click', () => row.remove());
+            optionIndex++;
+        });
+    </script>
+}
+
+

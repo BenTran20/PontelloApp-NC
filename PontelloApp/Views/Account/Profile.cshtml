@@ -1,0 +1,131 @@
+@using Microsoft.AspNetCore.Identity
+@using PontelloApp.Models
+@inject UserManager<User> UserManager
+@model PontelloApp.Models.User
+
+@{
+    ViewData["Title"] = "Profile";
+    var roles = await UserManager.GetRolesAsync(Model);
+    var initials = $"{Model.FirstName?[0]}{Model.LastName?[0]}".ToUpper();
+}
+
+<div class="container-fluid py-4" style="max-width: 960px;">
+    <div class="row g-4">
+
+        @* ── Sidebar ── *@
+        <div class="col-lg-3">
+            <div class="d-flex flex-column align-items-start">
+
+                <div class="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center mb-3"
+                     style="width:60px; height:60px; font-size:20px; font-weight:600; color:#495057;">
+                    @initials
+                </div>
+
+                <div class="fw-semibold">@Model.FirstName @Model.LastName</div>
+                <div class="text-muted small mb-4" style="word-break:break-all;">@Model.Email</div>
+
+                <nav class="nav flex-column w-100 gap-1">
+                    <a asp-action="Profile" asp-controller="Account"
+                       class="nav-link rounded px-3 py-2 active bg-light text-dark fw-medium">
+                        Profile
+                    </a>
+                    <a asp-action="Settings" asp-controller="Account"
+                       class="nav-link rounded px-3 py-2 text-secondary">
+                        Settings
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        @* ── Content ── *@
+        <div class="col-lg-9">
+            <h2 class="mb-3">Profile</h2>
+
+            @* Personal *@
+            <div class="card border mb-3">
+                <div class="card-body">
+                    <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Personal</p>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 fw-normal text-muted">Full name</dt>
+                        <dd class="col-sm-8 mb-2">@Model.FirstName @Model.LastName</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Email</dt>
+                        <dd class="col-sm-8 mb-2">@Model.Email</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Phone</dt>
+                        <dd class="col-sm-8 mb-2">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "—" : Model.PhoneNumber)</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Role</dt>
+                        <dd class="col-sm-8 mb-0">
+                            @if (roles.Any())
+                            {
+                                foreach (var r in roles)
+                                {
+                                    <span class="badge bg-dark rounded-pill me-1">@r</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            @* Company *@
+            <div class="card border mb-3">
+                <div class="card-body">
+                    <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Company</p>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 fw-normal text-muted">Company name</dt>
+                        <dd class="col-sm-8 mb-2">@(string.IsNullOrEmpty(Model.CompanyName) ? "—" : Model.CompanyName)</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">BIN / EIN</dt>
+                        <dd class="col-sm-8 mb-0">
+                            @if (string.IsNullOrEmpty(Model.BINorEIN))
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                            else
+                            {
+                                @Model.BINorEIN
+                                <span class="badge bg-success rounded-pill ms-2" style="font-size:11px;">Tax-exempt</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            @* Address *@
+            <div class="card border">
+                <div class="card-body">
+                    <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Shipping / billing address</p>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 fw-normal text-muted">Street</dt>
+                        <dd class="col-sm-8 mb-2">
+                            @(string.IsNullOrEmpty(Model.AddressLine1) ? "—" : Model.AddressLine1)
+                            @if (!string.IsNullOrEmpty(Model.AddressLine2))
+                            {
+                                <span class="text-muted">, @Model.AddressLine2</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">City</dt>
+                        <dd class="col-sm-8 mb-2">@(string.IsNullOrEmpty(Model.City) ? "—" : Model.City)</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Province / State</dt>
+                        <dd class="col-sm-8 mb-2">@(string.IsNullOrEmpty(Model.Province) ? "—" : Model.Province)</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Postal / ZIP</dt>
+                        <dd class="col-sm-8 mb-2">@(string.IsNullOrEmpty(Model.PostalCode) ? "—" : Model.PostalCode)</dd>
+
+                        <dt class="col-sm-4 fw-normal text-muted">Country</dt>
+                        <dd class="col-sm-8 mb-0">@(string.IsNullOrEmpty(Model.Country) ? "—" : Model.Country)</dd>
+                    </dl>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

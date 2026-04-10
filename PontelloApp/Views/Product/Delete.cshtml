@@ -1,0 +1,155 @@
+﻿@model PontelloApp.Models.Product
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <partial name="_BackToList"/>
+
+</div>
+
+<h1 class="text-danger mb-4">
+    Archive Product: @Model.ProductName
+</h1>
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<p>
+    This product will be archived and will no longer be visible to customers.
+</p>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="ID" />
+    <input type="hidden" asp-for="RowVersion" />
+
+    <div class="row">
+        <!-- PRODUCT INFO -->
+        <div class="card shadow-sm mb-4 border-danger">
+            <div class="card-header fw-semibold bg-danger-subtle">
+                Product Information
+            </div>
+
+            <div class="card-body">
+                <div class="row g-4">
+
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase">Handle</small>
+                        <div class="fw-semibold">@Model.Handle</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase">Status</small>
+                        <div>
+                            <span class="badge bg-success">Active</span>
+                            <span class="text-muted ms-2">→ Will be archived</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase">Vendor</small>
+                        <div class="fw-semibold">@Model.Vendor</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase">Category</small>
+                        <div class="fw-semibold">@Model.Category?.FullCategory</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase">Type</small>
+                        <div class="fw-semibold">@Model.Type</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase">Tags</small>
+                        <div class="fw-semibold">@Model.Tag</div>
+                    </div>
+
+                </div>
+
+                <hr class="my-4" />
+
+                <div>
+                    <small class="text-muted text-uppercase">Description</small>
+                    <div class="mt-2">
+                        @Html.Raw(Model.Description)
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VARIANTS -->
+            <div class="card shadow border-danger">
+                <div class="card-header fw-bold bg-danger-subtle d-flex justify-content-between">
+                    Variants
+                    <span class="small">
+                        @Model.Variants?.Count() total
+                    </span>
+                </div>
+
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>SKU</th>
+                                <th>Options</th>
+                                <th>Price</th>
+                                <th>Compare</th>
+                                <th>Stock</th>
+                                <th>Weight</th>
+                                <th>Policy</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var v in Model.Variants ?? Enumerable.Empty<PontelloApp.Models.ProductVariant>())
+                            {
+                                <tr>
+                                    <td><strong>@v.SKU_ExternalID</strong></td>
+
+                                    <td>
+                                        @string.Join(", ",
+                                        v.Options?.Select(o => $"{o.Name}: {o.Value}")
+                                        ?? new List<string>())
+                                </td>
+
+                                <td>@v.UnitPrice.ToString("C")</td>
+
+                                <td>
+                                    @(v.CompareAtPrice.HasValue? v.CompareAtPrice.Value.ToString("C"): "-")
+                                </td>
+
+                                    <td>@v.StockQuantity</td>
+                                    <td>@v.Weight</td>
+                                    <td>@v.InventoryPolicy</td>
+
+                                    <td>
+                                    @if (v.Status)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end">
+        <a asp-action="Details"
+           asp-route-id="@Model.ID"
+           class="btn btn-outline-secondary me-2">
+            Cancel
+        </a>
+
+        <button type="submit"
+                class="btn btn-danger">
+            <em class="bi bi-archive"></em> Archive Product
+        </button>
+    </div>
+</form>
+

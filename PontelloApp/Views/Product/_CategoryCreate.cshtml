@@ -1,0 +1,16 @@
+@model PontelloApp.Models.Category
+<form asp-controller="Category" asp-action="Create" id="createCategoryForm">
+    <div class="text-danger validation-summary-errors"><ul id="ErrorList"></ul></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <textarea asp-for="Name" class="form-control"></textarea>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" id="submitCategoryCreate" class="btn btn-outline-secondary" />
+            </div>
+        </div>
+    </div>
+</form>

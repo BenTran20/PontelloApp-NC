@@ -1,0 +1,28 @@
+﻿@model PontelloApp.Models.Category
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<div class="row justify-content-center">
+    <h1>Delete Category</h1>
+    <hr />
+
+
+    <div class="col-md-7">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <p>Are you sure you want to delete the following category?</p>
+
+        <p class="fw-bold border rounded px-2 py-1 bg-light">
+            @(ViewBag.FullCategory ?? Model.Name)
+        </p>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="ID" />
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

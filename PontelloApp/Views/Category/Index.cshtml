@@ -1,0 +1,30 @@
+@model IEnumerable<PontelloApp.Models.Category>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<h1>Categories</h1>
+<p class="mt-3">
+    This page lets you manage main categories and subcategories.
+</p>
+
+<div class="alert alert-info">
+    <strong>Tip:</strong> Use <strong>Create New</strong> to add a <strong>main category</strong>.
+    <br>To add a <strong>subcategory</strong>, click <strong> + Subcategory</strong> beside the category you want.
+    <br>You can also Edit
+    <i class="bi bi-pencil-square text-primary"></i>
+    or Delete
+    <i class="bi bi-trash3 text-danger"></i>
+    categories using the buttons on each item.
+</div>
+
+<p>
+    <a asp-action="Create" class="btn btn-gray">
+        <i class="bi bi-plus-lg me-1"></i> Create New
+    </a>
+</p>
+
+<div id="rootAccordion">
+    <partial name="_CategoryTree" model="Model" />
+</div>

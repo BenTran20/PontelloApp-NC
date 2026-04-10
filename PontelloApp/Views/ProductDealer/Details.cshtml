@@ -1,0 +1,326 @@
+@model PontelloApp.Models.Product
+
+<div class="container py-5">
+
+    <!-- SUCCESS MESSAGE -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div id="successAlert" class="alert alert-success fade show shadow-sm">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <strong>@TempData["SuccessMessage"]</strong>
+        </div>
+
+        <script>
+            setTimeout(() => {
+                const alert = document.getElementById("successAlert");
+                if (alert) {
+                    alert.style.transition = "opacity 0.5s ease";
+                    alert.style.opacity = "0";
+                    setTimeout(() => alert.remove(), 500);
+                }
+            }, 5000);
+        </script>
+    }
+
+    <!-- ERROR MESSAGE (server-side validation) -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div id="errorAlert" class="alert alert-danger fade show shadow-sm">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>@TempData["ErrorMessage"]</strong>
+        </div>
+
+        <script>
+            setTimeout(() => {
+                const alert = document.getElementById("errorAlert");
+                if (alert) {
+                    alert.style.transition = "opacity 0.5s ease";
+                    alert.style.opacity = "0";
+                    setTimeout(() => alert.remove(), 500);
+                }
+            }, 5000);
+        </script>
+    }
+
+    <div class="row g-5">
+
+        <!-- PRODUCT INFORMATION -->
+        <div class="col-lg-7">
+
+            <h2 class="fw-bold mb-3">
+                @Model.ProductName
+            </h2>
+
+            <div class="text-muted mb-4">
+                @Html.Raw(Model.Description)
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <h6 class="fw-bold mb-3 text-muted text-uppercase small">
+                        Product Details
+                    </h6>
+
+                    <div class="row mb-2">
+                        <div class="col-4 text-muted">Vendor</div>
+                        <div class="col-8 fw-semibold">@Model.Vendor.Name</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-4 text-muted">Handle</div>
+                        <div class="col-8">@Model.Handle</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-4 text-muted">Category</div>
+                        <div class="col-8">
+                            @Model.Category?.FullCategory
+                        </div>
+                    </div>
+
+                    <!--Taxable-->
+                    <div class="row mb-2">
+                        <div class="col-4 text-muted">Tax Status</div>
+                        <div class="col-8">
+                            @(Model.IsTaxable ? "Taxable" : "Non-Taxable")
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4 text-muted">Type</div>
+                        <div class="col-8">@Model.Type</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- PURCHASE CARD -->
+        <div class="col-lg-5">
+
+            <div class="card shadow rounded-2 border-0 sticky-top"
+                 style="top:100px; z-index: 1;">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        <i class="bi bi-bag me-2"></i>
+                        Buy Product
+                    </h5>
+
+                    <form asp-action="AddToCart" method="post" id="addToCartForm">
+
+                        <input type="hidden"
+                               name="productId"
+                               value="@Model.ID" />
+
+                        <!-- VARIANT -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Choose Variant
+                            </label>
+
+                            <select name="variantId"
+                                    class="form-select"
+                                    id="variantSelect"
+                                    required>
+
+                                @{
+                                    var variants = Model.Variants?.ToList() ?? new List<PontelloApp.Models.ProductVariant>();
+                                    var hasMultiple = variants.Count > 1;
+                                }
+
+                                @if (hasMultiple)
+                                {
+                                <option value="">
+                                    Select a variant
+                                </option>
+                                }
+
+                                @foreach (var v in Model.Variants ?? Enumerable.Empty<PontelloApp.Models.ProductVariant>())
+                                {
+                                    <option value="@v.Id"
+                                            data-stock="@v.StockQuantity"
+                                            data-inventory="@(v.InventoryPolicy.HasValue ? v.InventoryPolicy.Value.ToString().ToLower() : "deny")">
+                                        @string.Join(" • ", v.Options.Select(o => $"{o.Name}: {o.Value}"))
+                                        — @v.UnitPrice.ToString("C")
+                                    </option>
+                                }
+
+                            </select>
+
+                            <div class="mt-2 text-muted small" id="variantStockInfo" style="display:none;">
+                                @* Stock: <span id="stockQty">0</span> *@
+                                <span id="stockOutLabel" class="fw-semibold text-danger" style="display:none;"> (Out of stock)</span>
+                                <span id="specialOrderLabel" class="fw-semibold text-success" style="display:none;"> (Special order available)</span>
+                            </div>
+
+                        </div>
+
+                        <!-- QUANTITY -->
+                        <div class="mb-4">
+
+                            <label class="form-label fw-semibold">
+                                Quantity
+                            </label>
+
+                            <label for="quantityInput" class="visually-hidden">Quantity</label>
+                            <input type="number"
+                                   name="quantity"
+                                   id="quantityInput"
+                                   value="1"
+                                   min="1"
+                                   class="form-control" />
+
+                            <div class="mt-2" id="quantityFeedback" style="display:none;">
+                                <small class="text-danger" id="quantityFeedbackText"></small>
+                            </div>
+
+                        </div>
+
+                        <!-- ADD TO CART -->
+                        <button type="submit"
+                                id="addToCartBtn"
+                                class="btn btn-primary w-100 py-3 fw-semibold">
+
+                            <i class="bi bi-cart-plus me-2"></i>
+                            Add to Cart
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const variantSelect = document.getElementById('variantSelect');
+            const stockQtySpan = document.getElementById('stockQty');
+            const stockInfo = document.getElementById('variantStockInfo');
+            const stockOutLabel = document.getElementById('stockOutLabel');
+            const specialOrderLabel = document.getElementById('specialOrderLabel');
+            const quantityInput = document.getElementById('quantityInput');
+            const addBtn = document.getElementById('addToCartBtn');
+            const quantityFeedback = document.getElementById('quantityFeedback');
+            const quantityFeedbackText = document.getElementById('quantityFeedbackText');
+            const form = document.getElementById('addToCartForm');
+
+            function getSelectedOption() {
+                return variantSelect.options[variantSelect.selectedIndex];
+            }
+
+            function parseStock(opt) {
+                if (!opt) return 0;
+                return parseInt(opt.getAttribute('data-stock') || '0', 10);
+            }
+
+            function parseInventoryPolicy(opt) {
+                if (!opt) return 'deny';
+                return (opt.getAttribute('data-inventory') || 'deny').toLowerCase();
+            }
+
+            function showStock() {
+                const opt = getSelectedOption();
+                if (!opt || !opt.value) {
+                    stockInfo.style.display = 'none';
+                    quantityFeedback.style.display = 'block';
+                    quantityFeedbackText.textContent = 'Please select a variant.';
+                    addBtn.disabled = true;
+                    return;
+                }
+
+                const stock = parseStock(opt);
+                const inventory = parseInventoryPolicy(opt);
+
+                stockQtySpan.textContent = stock;
+                stockInfo.style.display = 'block';
+
+                // reset labels
+                stockOutLabel.style.display = 'none';
+                specialOrderLabel.style.display = 'none';
+
+                if (inventory === 'deny') {
+                    if (stock <= 0) {
+                        stockOutLabel.style.display = 'inline';
+                    }
+                } else if (inventory === 'continue') {
+                    // special order: allow ordering even when stock is zero
+                    if (stock <= 0) {
+                        specialOrderLabel.style.display = 'inline';
+                    }
+                }
+
+                validateQuantity();
+            }
+
+            function validateQuantity() {
+                const opt = getSelectedOption();
+                if (!opt || !opt.value) {
+                    addBtn.disabled = true;
+                    return;
+                }
+
+                const stock = parseStock(opt);
+                const inventory = parseInventoryPolicy(opt);
+                const qty = Math.max(0, parseInt(quantityInput.value || '0', 10));
+
+                if (qty <= 0) {
+                    quantityFeedback.style.display = 'block';
+                    quantityFeedbackText.textContent = 'Quantity must be at least 1.';
+                    addBtn.disabled = true;
+                    return;
+                }
+
+                if (inventory === 'deny') {
+                    if (stock <= 0) {
+                        quantityFeedback.style.display = 'block';
+                        quantityFeedbackText.textContent = 'Selected variant is out of stock.';
+                        addBtn.disabled = true;
+                        return;
+                    }
+
+                    if (qty > stock) {
+                        quantityFeedback.style.display = 'block';
+                        quantityFeedbackText.textContent = `Requested quantity (${qty}) exceeds available stock (${stock}).`;
+                        addBtn.disabled = true;
+                        return;
+                    }
+                } else if (inventory === 'continue') {
+                    // special order: allow ordering regardless of stock (including stock == 0)
+                    // still hide quantity feedback
+                    quantityFeedback.style.display = 'none';
+                }
+
+                // valid
+                quantityFeedback.style.display = 'none';
+                addBtn.disabled = false;
+            }
+
+            // Prevent submission when invalid (defensive)
+            form.addEventListener('submit', function (e) {
+                if (addBtn.disabled) {
+                    e.preventDefault();
+                }
+            });
+
+            variantSelect.addEventListener('change', showStock);
+            quantityInput.addEventListener('input', validateQuantity);
+
+            // initialize
+            showStock();
+        })();
+    </script>
+}

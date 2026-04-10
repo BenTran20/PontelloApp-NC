@@ -1,0 +1,81 @@
+@model List<PontelloApp.Models.Notification>
+@{
+    ViewData["Title"] = "All Notifications";
+}
+
+<div class="container py-4" style="max-width: 900px;">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-semibold mb-0">Notifications</h3>
+        <button class="btn btn-outline-primary btn-sm" id="markAll">
+            Mark all as read
+        </button>
+    </div>
+
+    <!-- Card wrapper -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+
+            @if (Model.Any())
+            {
+                @foreach (var n in Model.OrderByDescending(x => x.CreatedAt))
+                {
+                    <div class="d-flex justify-content-between align-items-start px-3 py-3 border-bottom notification-item @(!n.IsRead ? "bg-light" : "")">
+
+                        <!-- Left content -->
+                        <div class="me-3" style="flex:1;">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold">@n.Title</span>
+                                <small class="text-muted">@n.CreatedAt.ToString("g")</small>
+                            </div>
+
+                            <div class="text-muted small mt-1">
+                                @n.Message
+                            </div>
+
+                            <div class="mt-1">
+                                <span class="badge bg-secondary">@n.Type</span>
+                            </div>
+                        </div>
+
+                        <!-- Right actions -->
+                        <div class="text-end">
+                            @if (!n.IsRead)
+                            {
+                                <button class="btn btn-sm btn-primary mark-read" data-id="@n.Id">
+                                    Read
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell fs-2 mb-2 d-block"></i>
+                    No notifications yet
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.mark-read').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const id = btn.dataset.id;
+                await fetch(`/Notification/MarkAsRead/${id}`, { method: 'POST' });
+                location.reload();
+            });
+        });
+
+        document.getElementById('markAll').addEventListener('click', async () => {
+            await fetch('/Notification/MarkAllAsRead', { method: 'POST' });
+            location.reload();
+        });
+    </script>
+}

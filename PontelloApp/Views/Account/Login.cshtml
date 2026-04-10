@@ -1,0 +1,51 @@
+@using PontelloApp.ViewModels
+@model LoginVM
+
+<div class="account-container" style="display:flex;justify-content:center;margin-top:50px;">
+    <div class="account-box" style="padding:30px 40px;border:1px solid #ddd;border-radius:10px;width:400px;background:#f9f9f9;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="text-align:center;margin-bottom:25px;">Login</h2>
+
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" id="Email" placeholder="Email" class="form-control" aria-describedby="Email-error" />
+                <span asp-validation-for="Email" id="Email-error" class="text-danger"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" id="Password" type="password" placeholder="Password" class="form-control" aria-describedby="Password-error" />
+                <span asp-validation-for="Password" id="Password-error" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 text-end">
+                <a asp-controller="Account" asp-action="VerifyEmail" class="text-decoration">
+                    Forgot password?
+                </a>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input asp-for="RememberMe" id="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 p-2">Login</button>
+
+            <p class="text-center mt-3">
+                Don't have an account?
+                <a asp-controller="Account" asp-action="Register" class="text-decoration">Register</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
+    }
+}

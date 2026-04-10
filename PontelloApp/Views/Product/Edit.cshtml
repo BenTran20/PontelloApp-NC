@@ -1,0 +1,283 @@
+@model PontelloApp.Models.Product
+
+<div class="mb-3">
+    <partial name="_BackToList" />
+</div>
+
+<partial name="_addVendorModal" />
+
+<h2 class="text-center mb-4">Edit Product</h2>
+
+<!-- Alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success shadow-sm">
+        @Html.Raw(TempData["Success"])
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger shadow-sm">
+        @Html.Raw(TempData["Error"])
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-header fw-semibold">
+        Product Information
+    </div>
+
+    <div class="card-body">
+        <form asp-action="Edit" asp-route-id="@Model.ID" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="RowVersion" />
+
+            <div class="row g-4">
+
+                <!-- LEFT COLUMN -->
+                <div class="col-md-6">
+
+                    <!-- Product Name -->
+                    <div class="mb-3">
+                        <label asp-for="ProductName" class="form-label">
+                            Product Name
+                            <i class="bi bi-info-circle text-primary"
+                               data-bs-toggle="tooltip"
+                               title="Enter the product name (max 200 characters)"></i>
+                        </label>
+                        <input asp-for="ProductName"
+                               list="ProductNameList"
+                               class="form-control"
+                               placeholder="Enter product name" />
+                        <datalist id="ProductNameList">
+                            <option value="Multichron Stopwatch"></option>
+                            <option value="Van-K Quarter Midget Wheels - Select Series"></option>
+                            <option value="Mini Outlaw Box Stock Kart Package"></option>
+                            <option value="Steering Shaft"></option>
+                        </datalist>
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Handle -->
+                    <div class="mb-3">
+                        <label asp-for="Handle" class="form-label">
+                            Handle
+                            <i class="bi bi-info-circle text-primary"
+                               data-bs-toggle="tooltip"
+                               title="Lowercase letters and hyphens only"></i>
+                        </label>
+                        <input asp-for="Handle"
+                               list="HandleList"
+                               class="form-control"
+                               placeholder="e.g., my-product-name" />
+                        <datalist id="HandleList">
+                            <option value="multichron-stopwatch"></option>
+                            <option value="van-k-quarter-midget-wheels-select-series"></option>
+                            <option value="mini-outlaw-kart-package"></option>
+                            <option value="steering-shaft"></option>
+                        </datalist>
+                        <span asp-validation-for="Handle" class="text-danger"></span>
+                    </div>
+
+                    <!-- Vendor -->
+                    <div class="mb-3">
+                        <label asp-for="VendorID" class="form-label">
+                            Vendor
+                        </label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#addVendorModal"
+                                    type="button">
+                                +
+                            </button>
+                            <select asp-for="VendorID" class="form-select" asp-items="ViewBag.VendorID">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="VendorID" class="text-danger"></span>
+                    </div>
+
+                    <!-- Type -->
+                    <div class="mb-3">
+                        <label asp-for="Type" class="form-label">
+                            Type
+                        </label>
+                        <input asp-for="Type"
+                               list="TypeList"
+                               class="form-control"
+                               placeholder="Accessories, Hardware..." />
+                        <datalist id="TypeList">
+                            <option value="Electronic Hardware"></option>
+                            <option value="Wheels"></option>
+                            <option value="Chassis Package"></option>
+                            <option value="Steering Components"></option>
+                        </datalist>
+                        <span asp-validation-for="Type" class="text-danger"></span>
+                    </div>
+
+                    <!-- Tag -->
+                    <div class="mb-3">
+                        <label asp-for="Tag" class="form-label">
+                            Tags
+                        </label>
+                        <input asp-for="Tag"
+                               class="form-control"
+                               placeholder="Comma separated keywords" />
+                        <span asp-validation-for="Tag" class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div class="col-md-6">
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">
+                            Description
+                        </label>
+                        <textarea asp-for="Description"
+                                  rows="7"
+                                  class="form-control"
+                                  placeholder="Product description"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <!-- Active -->
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" asp-for="IsActive" />
+                        <label class="form-check-label" asp-for="IsActive"></label>
+                    </div>
+
+                    <!--Taxable-->
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" asp-for="IsTaxable" />
+                        <label class="form-check-label" asp-for="IsTaxable"></label>
+                    </div>
+
+                    <!-- Unlisted -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" asp-for="IsUnlisted" />
+                        <label class="form-check-label" asp-for="IsUnlisted">
+                            Is Unlisted
+                            <i class="bi bi-info-circle text-primary"
+                               data-bs-toggle="tooltip"
+                               title="Hidden from catalog but usable for internal orders"></i>
+                        </label>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label asp-for="CategoryID" class="form-label">
+                            Category
+                        </label>
+                        <select asp-for="CategoryID"
+                                asp-items="@(ViewData["CategoryID"] as IEnumerable<SelectListItem>)"
+                                class="form-select">
+                            <option value="">-- Select Category --</option>
+                        </select>
+                        <span asp-validation-for="CategoryID" class="text-danger"></span>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-end mt-4">
+                        <a asp-action="Details" asp-route-id="@Model.ID" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Enable Bootstrap Tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        tooltipTriggerList.map(el => new bootstrap.Tooltip(el))
+    </script>
+
+    <script src="~/js/refreshDDL.js"></script>
+
+    <script type="text/javascript">
+        $('#submitVendorCreate').click(function (event) {
+            event.preventDefault();
+            ClearErrors();
+            var form = $('#createVendorForm');
+            if (form.valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function (data) {
+                        $('#addVendorModal').modal('hide');
+
+                        var ddl = $('#VendorID');
+
+                        if (ddl.find('option[value=""]').length === 0) {
+                            ddl.append($('<option/>', { value: "", text: "None" }));
+                        }
+                        $.each(data, function (i, item) {
+                            ddl.append($('<option/>', {
+                                value: item.value,
+                                text: item.text,
+                                selected: item.selected
+                            }));
+                        });
+
+                        ddl.trigger("chosen:updated");
+                    },
+                    error: function (xhr) { //Note: xhr is the XMLHttpRequest
+                        var errorMessages = [];
+                        switch (xhr.status) {
+                            case 401:
+                                errorMessages.push("You must be logged in first.");
+                                break;
+                            case 403:
+                                errorMessages.push("You are not authorized for this action.");
+                                break;
+                            default:
+                                //Messages coming from the Model State Errors
+                                //We split on the | delimeter and the .slice removes the last one
+                                errorMessages = xhr.responseText.split("|").slice(0, -1);
+                        }
+                        //This checks if there are any elements with some content
+                        //and if not then it provides a default feedback message.
+                        if (!errorMessages.some((str) => str !== "")) {
+                          errorMessages.push("Error: Unable to complete operation");
+                        }
+                        //Put the messages in the ErrorList ul contained in the 'ValidaitonSummary' div.
+                        var ul = document.getElementById("ErrorList");
+                        for (var i = 0; i < errorMessages.length; i++) {
+                          var errorMessage = errorMessages[i];
+                          var li = document.createElement("li");
+                          li.innerHTML = errorMessage;
+                          ul.appendChild(li);
+                        }
+                    }
+                });
+            }
+            return false;
+        });
+        $('#addVendorModal').on('hide.bs.modal', function () {
+            document.getElementById("createVendorForm").reset();//to clear the data in the popup form
+            ClearErrors();
+            var selectedOption = $('#VendorID').val();//Return to the current selected value
+        });
+        function ClearErrors() {
+            //Empty out the list of validation errors if there are any
+            var ul = document.getElementById("ErrorList");
+            while (ul.firstChild) {
+              ul.removeChild(ul.firstChild);
+            }
+        }
+    </script>
+}

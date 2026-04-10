@@ -1,0 +1,288 @@
+@model IEnumerable<PontelloApp.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div id="successAlert" class="alert alert-success fade show">
+        <strong>
+            @TempData["Success"] <br />
+            @TempData["Status"]
+        </strong>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const alert = document.getElementById("successAlert");
+            if (alert) {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = "0";
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 4000);
+    </script>
+}
+
+<form asp-action="Index" method="get">
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+
+            <!-- Sidebar -->
+            <div class="col-md-3">
+
+                <!-- guide -->
+
+                <div class="card shadow-sm p-3">
+
+                    <h6 class="fw-bold mb-3">Filters</h6>
+
+                    <!-- Search -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Search</label>
+
+                        <div class="input-group">
+                            @Html.TextBox("SearchString", null, new
+                            {
+                                @class = "form-control",
+                                placeholder = "Product Name/Handle"
+                            })
+
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sort -->
+                    <div class="mb-3">
+
+                        <label class="form-label small fw-semibold">Sort</label>
+
+                        <div class="d-flex gap-2">
+
+                            <button type="submit"
+                                    name="actionButton"
+                                    value="A-Z"
+                                    class="btn btn-outline-secondary btn-sm w-100">
+                                A-Z
+                            </button>
+
+                            <button type="submit"
+                                    name="actionButton"
+                                    value="Z-A"
+                                    class="btn btn-outline-secondary btn-sm w-100">
+                                Z-A
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Category -->
+                    <div class="mb-3">
+
+                        <label class="form-label small fw-semibold">Category</label>
+
+                        @Html.DropDownList(
+                            "CategoryID",
+                            null,
+                            "All categories",
+                            new { @class = "form-select" }
+                        )
+
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                        Apply Filters
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                        Reset
+                    </a>
+
+                    <hr />
+
+                    <h6 class="fw-bold mb-3">Manage</h6>
+
+                    <a asp-action="Archive" id="archivedProducts"
+                       class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="bi bi-archive"></i> Archived Products
+                    </a>
+
+                    <a asp-controller="Category"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="bi bi-tags"></i> Categories
+                    </a>
+
+                    <a asp-controller="Vendor"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-building"></i> Vendors
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+
+                    <div>
+                        <h3 class="mb-0">Products</h3>
+
+                        <span class="text-muted small">
+                            @ViewData["TotalItems"] items
+                        </span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+                        <a asp-action="Create"
+                           class="btn btn-primary">
+                            <i class="bi bi-plus-lg"></i>
+                            New Product
+                        </a>
+
+                        <a asp-action="DownloadPontello" asp-controller="Product" asp-route-search="@ViewData["SearchString"]"
+                        asp-route-categoryID="@ViewData["SelectCategoryID"]" asp-route-sortField="@ViewData["sortField"]" asp-route-sortDirection="@ViewData["sortDirection"]"
+                           class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+                            <i class="bi bi-download"></i> Export to CSV
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Table -->
+                <div class="card shadow-sm">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:25%">Product</th>
+                                    <th style="width:15%">Handle</th>
+                                    <th style="width:20%">Vendor</th>
+                                    <th style="width:15%">Category</th>
+                                    <th style="width:10%">Status</th>
+                                    <th class="text-end" style="width:15%">Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <strong>@item.ProductName</strong>
+                                            <br />
+                                            <small class="text-muted">@item.Type</small>
+                                        </td>
+
+                                        <td>
+                                            <span class="text-muted small">
+                                                @item.Handle
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            @item.Vendor?.Name
+                                        </td>
+
+                                        <td>
+                                            @item.Category?.Name
+                                        </td>
+
+                                        <td>
+
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="badge bg-success-subtle"
+                                                      style="color:#0D4E30">
+                                                    Active
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary-subtle text-secondary">
+                                                    Archived
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-action="Details"
+                                                   asp-route-id="@item.ID"
+                                                   class="btn btn-secondary"
+                                                   style="text-decoration: none"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="top"
+                                                   title="Details">
+                                                    Details
+                                                </a>
+
+                                                <a asp-controller="AddProductVariant"
+                                                   asp-action="Index"
+                                                   asp-route-id="@item.ID"
+                                                   style="text-decoration: none"
+                                                   class="btn btn-primary"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="top"
+                                                   title="Edit product">
+                                                    Edit
+                                                </a>
+
+                                                <a asp-action="Delete" id="archivebtn"
+                                                   asp-route-id="@item.ID"
+                                                   class="btn btn-danger"
+                                                   style="text-decoration: none"
+                                                   data-bs-toggle="tooltip"
+                                                   data-bs-placement="top"
+                                                   title="Archive product">
+                                                    Archive
+                                                </a>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <partial name="_PagingNavBar" />
+
+            </div>
+
+        </div>
+    </div>
+
+</form>
+
+@section Scripts {
+    <script>
+        document.getElementById("startTourBtn").addEventListener("click", function () {
+            startTour();
+        });
+    </script>
+}

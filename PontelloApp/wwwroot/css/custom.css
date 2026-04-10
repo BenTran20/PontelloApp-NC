@@ -1,0 +1,170 @@
+:root {
+    --grey-main: #F0F0F0;
+    --sand: #D4D6B9;
+    --evergreen: #F4E9CD;
+    --brown: #5B4636;
+    --gray: #363635;
+    --carbon: #1A1A1A;
+}
+
+.headingfontsize {
+    font-size: 0.85rem;
+}
+
+body {
+    background-color: var(--grey-main);
+    color: var(--carbon);
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+h1, h2, h3, h4, h5 {
+    color: var(--gray);
+    font-weight: 700;
+}
+
+.card,
+.section-box {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.btn-lightgray {
+    background-color: #DADADA;
+    border-color: #434343;
+    color: black;
+    font-weight: bold;
+}
+
+    .btn-lightgray:hover {
+        background-color: #B8B8B8;
+        border-color: #434343;
+        color: black;
+        text-decoration: none;
+    }
+
+.btn-gray {
+    background-color: #434343;
+    color: white;
+    font-weight: bold;
+    border: none;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-gray:hover {
+        background-color: #272727;
+        color: white;
+        text-decoration: none;
+    }
+
+.btn-blue {
+    background-color: #399EF1;
+    color: black;
+    font-weight: bold;
+    border: 1px solid #2A8DDD;
+    transition: background-color 0.2s ease;
+}
+
+    .btn-blue:hover {
+        background-color: #2A8DDD;
+        color: black;
+        text-decoration: none;
+    }
+
+.btn-outline-primary {
+    color: #4A5159;
+}
+
+.btn-outline-secondary:hover {
+    text-decoration:none;
+}
+
+.btn-outline-secondary {
+    color: #4A5159;
+}
+.btn-outline-dark {
+    color: var(--carbon);
+    border-color: var(--carbon);
+}
+
+.btn-outline-dark:hover {
+        background-color: var(--carbon);
+        color: #fff;
+    }
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.form-control:focus {
+        border-color: var(--evergreen);
+        box-shadow: 0 0 0 0.15rem rgba(30, 60, 40, 0.2);
+}
+
+.table {
+    background-color: #fff;
+}
+
+.table thead {
+        background-color: var(--sand);
+        color: var(--evergreen);
+    }
+
+
+a {
+    text-decoration: none;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+.btn-addcart {
+    background-color: #D4D6B9;
+    color: #000; 
+    border: 1px solid #D4D6B9;
+    transition: all 0.2s;
+    font-weight:bold;
+}
+
+    .btn-addcart:hover {
+        background-color: #c0c2aa;
+        text-decoration: none;
+        color: #000;
+    }
+
+
+
+.btn-success {
+    color: white;
+    transition: all 0.2s;
+    font-weight: bold;
+}
+
+    .btn-success:hover {
+        text-decoration: none;
+        color: white;
+    }
+
+
+.pagination .page-item.active .page-link {
+    background-color: #399EF1;
+    border-color: #2A8DDD;
+}
+
+    .pagination .page-item.active .page-link:hover {
+        background-color: #2A8DDD;
+    }
+
+#pageSizeModal .btn {
+    background-color: #399EF1;
+    border: 1px solid #2A8DDD;
+    color: black;
+}
+
+    #pageSizeModal .btn:hover {
+        background-color: #2A8DDD;
+        color: black;
+        text-decoration: none;
+    }

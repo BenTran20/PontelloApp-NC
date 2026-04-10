@@ -1,0 +1,30 @@
+@using PontelloApp.ViewModels
+@model VerifyEmailVM
+
+<div class="d-flex justify-content-center mt-5">
+    <div class="card p-4" style="width: 400px;">
+        <h2 class="text-center mb-4">Verify Email</h2>
+
+        <form asp-action="VerifyEmail" method="post" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="Email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 py-2">Verify Email</button>
+
+            <div class="text-center mt-3">
+                <a asp-controller="Home" asp-action="Index">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,9 @@
+Add-Migration -Context ApplicationDbContext -OutputDir Data\Migrations Initial
+
+Add-Migration -Context PontelloAppContext -o Data\POMigrations Initial
+
+Update-Database -Context ApplicationDbContext 
+Update-Database -Context PontelloAppContext 
+
+Drop-Database -Context ApplicationDbContext 
+Drop-Database -Context PontelloAppContext 

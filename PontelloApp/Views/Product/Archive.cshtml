@@ -1,0 +1,63 @@
+@model IEnumerable<PontelloApp.Models.Product>
+
+<partial name="_ViewHeading" />
+
+
+<h3 class="mb-3">Archived Products</h3>
+
+<partial name="_BackToList"/>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Name</th>
+            <th>Handle</th>
+            <th>Vendor</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ProductName</td>
+                <td>@item.Handle</td>
+                <td>@item.Vendor</td>
+                <td>@item.Category?.Name</td>
+                <td>
+                    <span class="badge bg-secondary">Archived</span>
+                </td>
+                <td class="text-end">
+                    <a asp-action="Details"
+                       asp-route-id="@item.ID"
+                       class="btn btn-outline-secondary btn-sm">
+                        Details
+                    </a>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@item.ID"
+                       class="btn btn-outline-primary btn-sm">
+                        Edit
+                    </a>
+
+                    <form asp-action="Unarchive" asp-route-id="@item.ID" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-success btn-sm">
+                            Unarchive
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

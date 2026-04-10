@@ -1,0 +1,143 @@
+﻿@model PontelloApp.Models.ProductVariant
+
+@{
+    ViewData["Title"] = "Remove Product Variant";
+}
+
+<div class="mb-1">
+    <a asp-action="Index"
+       asp-route-id="@Model.ProductId"
+       class="btn btn-outline-secondary btn-sm">
+        <em class="bi bi-arrow-left"></em> Back to Variants
+    </a>
+</div>
+
+<h1>
+    Remove Variant for @Model.Product?.ProductName
+</h1>
+
+<p>
+    This action will permanently remove this variant.
+</p>
+
+<form asp-action="Remove" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ProductId" />
+    <input type="hidden" asp-for="RowVersion" />
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-6">
+
+            <div class="mb-3">
+                <label for="SKU_ExternalID" class="form-label">SKU External ID</label>
+                <input id="SKU_ExternalID" class="form-control"
+                       value="@Model.SKU_ExternalID" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label for="UnitPrice" class="form-label">Unit Price</label>
+                <input id="UnitPrice" class="form-control"
+                       value="@Model.UnitPrice" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label for="CompareAtPrice" class="form-label">Compare At Price</label>
+                <input id="CompareAtPrice" class="form-control"
+                       value="@Model.CompareAtPrice" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label for="StockQuantity" class="form-label">Stock Quantity</label>
+                <input id="StockQuantity" class="form-control"
+                       value="@Model.StockQuantity" readonly />
+            </div>
+
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-6">
+
+            <div class="mb-3">
+                <label for="Weight" class="form-label">Weight</label>
+                <input id="Weight" class="form-control"
+                       value="@Model.Weight" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label for="Barcode" class="form-label">Barcode</label>
+                <input id="Barcode" class="form-control"
+                       value="@Model.Barcode" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label for="InventoryPolicy" class="form-label">Inventory Policy</label>
+                <input id="InventoryPolicy" class="form-control"
+                       value="@Model.InventoryPolicy" readonly />
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="StatusCheck" disabled
+                       @(Model.Status ? "checked" : "") />
+                <label class="form-check-label" for="StatusCheck">Active</label>
+            </div>
+
+        </div>
+    </div>
+
+    <hr />
+    <h2>Options</h2>
+
+    @if (Model.Options != null && Model.Options.Any())
+    {
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var opt in Model.Options)
+                {
+                    <tr>
+                        <td>
+                            <input class="form-control"
+                                   value="@opt.Name"
+                                   readonly
+                                   aria-label="Option Name" />
+                        </td>
+                        <td>
+                            <input class="form-control"
+                                   value="@opt.Value"
+                                   readonly
+                                   aria-label="Option Value" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p class="text-muted fst-italic">No options</p>
+    }
+
+    <!--code is implemented-->
+    <div class="mt-4 d-flex justify-content-end">
+        <a asp-action="Index"
+           asp-route-id="@Model.ProductId"
+           class="btn btn-outline-secondary me-2">
+            Cancel
+        </a>
+
+        <button type="submit"
+                @ViewData["CantSave"]
+                value="Archive"
+                class="btn btn-danger">
+            <em class="bi bi-trash"></em> Delete Variant
+        </button>
+    </div>
+</form>

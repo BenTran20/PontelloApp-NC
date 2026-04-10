@@ -1,0 +1,16 @@
+@model PontelloApp.Models.Vendor
+
+<form asp-controller="Vendor" asp-action="Create" id="createVendorForm" novalidate>
+    <div class="text-danger validation-summary-errors"><ul id="ErrorList"></ul></div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <textarea asp-for="Name" class="form-control" rows="2" placeholder="Enter vendor name"></textarea>
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" id="submitVendorCreate" class="btn btn-primary">Create</button>
+    </div>
+</form>

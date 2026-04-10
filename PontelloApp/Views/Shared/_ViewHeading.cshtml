@@ -1,0 +1,39 @@
+﻿@{
+    //Are we on an Index View?
+    if (ViewData["ActionName"]?.ToString() == "Index")
+    {
+        @:<h1>@ViewData["ControllerFriendlyName"]s</h1>
+    }
+    else if (ViewData["ActionName"]?.ToString() == "Create" ||
+                    ViewData["ActionName"]?.ToString() == "Add")
+    {
+        @:<h1>@ViewData["ActionName"] @ViewData["ControllerFriendlyName"]</h1>
+    }
+    else
+    {
+        //Use the summary property of the Model if you have one.
+        string? summary = "";
+        if (ViewData.ModelMetadata.Properties.FirstOrDefault(p => p.PropertyName == "Summary") != null)
+        {
+            // We DO, we DO have a Summary Property!
+            summary = Model?.Summary.ToString();
+        }
+        if (ViewData["ActionName"]?.ToString() == "Details")
+        {
+            @:<h1>@ViewData["ControllerFriendlyName"] Details@(summary == "" ? "" : ": " + summary)</h1>
+        }
+        else if (ViewData["ActionName"]?.ToString() == "Delete" ||
+                    ViewData["ActionName"]?.ToString() == "Remove")
+        {
+            @:<h1>@ViewData["ActionName"] @ViewData["ControllerFriendlyName"]</h1>
+            <p>
+                <h4>Are you sure you want to @ViewData["ActionNameLowerCase"]@(summary == "" ? " this " + ViewData["ControllerFriendlyName"] : ": " + summary)?</h4>
+            </p>
+        }
+        else if (ViewData["ActionName"]?.ToString() == "Edit" ||
+                    ViewData["ActionName"]?.ToString() == "Update")
+        {
+            @:<h1>@ViewData["ActionName"] @ViewData["ControllerFriendlyName"] @(summary == "" ? "" : " - " + summary)</h1>
+        }
+    }
+}

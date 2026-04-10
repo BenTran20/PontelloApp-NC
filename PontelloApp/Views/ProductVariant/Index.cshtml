@@ -1,0 +1,74 @@
+﻿@model IEnumerable<PontelloApp.Models.ProductVariant>
+
+@if (TempData["Success"] != null)
+{
+    <div class="green">
+        <div id="successAlert" class="alert alert-success fade show">
+            <strong>@TempData["Success"]</strong>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const alert = document.getElementById("successAlert");
+            if (alert) {
+                alert.classList.remove("show");  
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 4000);
+    </script>
+}
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SKU_ExternalID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StockQuantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductId)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SKU_ExternalID)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UnitPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StockQuantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductId)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

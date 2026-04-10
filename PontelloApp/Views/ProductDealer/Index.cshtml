@@ -1,0 +1,175 @@
+@using PontelloApp.Utilities
+@model PaginatedList<PontelloApp.Models.Product>
+
+<div class="container mt-4">
+    <div class="row">
+
+        <!-- FILTERS (GET) -->
+        <div class="col-md-3">
+            <form asp-action="Index" method="get">
+                <div class="card shadow-sm p-3">
+
+                    <!-- SEARCH -->
+                    <div class="mb-3">
+                        <label for="SearchString" class="form-label fw-semibold">Search</label>
+                        <div class="input-group">
+                            @Html.TextBox("SearchString", null, new { @class = "form-control", placeholder = "Product Name/Handle" })
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <em class="bi bi-search" aria-hidden="true"></em>
+                                <span class="visually-hidden">Search</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SORT -->
+                    <fieldset class="mb-3">
+                        <legend class="form-label fw-semibold fs-6">Sort</legend>
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="actionButton" value="A-Z"
+                                    class="btn btn-outline-secondary btn-sm w-100">
+                                A–Z
+                            </button>
+                            <button type="submit" name="actionButton" value="Z-A"
+                                    class="btn btn-outline-secondary btn-sm w-100">
+                                Z–A
+                            </button>
+                        </div>
+                    </fieldset>
+
+                    <!-- CATEGORY -->
+                    <div class="mb-3">
+                        <label for="CategoryID" class="form-label fw-semibold">Category</label>
+                        @Html.DropDownList("CategoryID", null, "All categories", new { @class = "form-select", id = "CategoryID" })
+                    </div>
+
+                    <a asp-action="Index" class="btn btn-outline-dark w-100 mb-2">Clear</a>
+                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                        Apply Filters
+                    </button>
+
+                    <hr />
+                </div>
+            </form>
+        </div>
+
+
+        <!-- PRODUCT LIST -->
+        <div class="col-md-9">
+
+            <div class="d-flex justify-content-between mb-3">
+                <h4>Shop</h4>
+                <small class="text-muted">
+                    @ViewData["TotalItems"] items
+                </small>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-3">
+
+                @foreach (var item in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm product-card-hover">
+
+                            <!-- CARD BODY -->
+                            <div class="card-body">
+                                <!-- PRODUCT NAME -->
+                                <h4 class="card-title">
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.ID"
+                                       class="text-decoration-none text-dark fw-bold">
+                                        @item.ProductName
+                                    </a>
+                                </h4>
+
+                                <!-- VENDOR -->
+                                <p class="card-text text-muted small mb-2">
+                                    @item.Vendor.Name
+                                </p>
+
+                                <!-- CATEGORY -->
+                                <span class="badge bg-primary">
+                                    @item.Category?.Name
+                                </span>
+                            </div>
+
+                            <!-- CARD FOOTER - QUICK ADD TO CART -->
+                            <div class="card-footer bg-white border-0">
+                                @if (item.Variants != null && item.Variants.Any())
+                                {
+                                    <form asp-action="AddToCart" method="post" class="d-flex gap-2 align-items-center">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="productId" value="@item.ID" />
+
+                                        <select name="variantId" class="form-select form-select-sm" style="max-width:45%;" onchange="updateQtyMax(this)">
+                                            @foreach (var v in item.Variants)
+                                            {
+                                                <option value="@v.Id" data-stock="@v.StockQuantity" data-policy="@(v.InventoryPolicy?.ToString() ?? "Deny")">
+                                                    @($"{v.SKU_ExternalID ?? ("Variant " + v.Id)} - {v.UnitPrice:C} - {v.StockQuantity} in stock")
+                                                </option>
+                                            }
+                                        </select>
+
+                                        <label for="quantity-@item.ID" class="visually-hidden">Quantity</label>
+                                        <input type="number" id="quantity-@item.ID" name="quantity" value="1" min="1" class="form-control form-control-sm" style="max-width:20%;" />
+
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm" style="min-width:110px;">
+                                            <i class="bi bi-cart-plus me-1"></i> Add
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <a asp-action="Details"
+                                       asp-route-id="@item.ID"
+                                       class="btn btn-outline-secondary w-100">
+                                        <i class="bi bi-info-circle me-1"></i> View Details
+                                    </a>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+
+
+            <form asp-action="Index" method="get">
+                <partial name="_PagingNavBar" />
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Set quantity max based on selected variant stock for each product card
+        function updateQtyMax(selectEl) {
+            var opt = selectEl.options[selectEl.selectedIndex];
+            var stock = parseInt(opt.dataset.stock || "0", 10);
+            var qtyInput = selectEl.parentElement.querySelector('input[name="quantity"]');
+            if (!qtyInput) return;
+
+            // If stock is 0 and inventory policy is Deny, set quantity to 0 and disable submit visually by setting button disabled
+            var policy = opt.dataset.policy || "Deny";
+            qtyInput.max = stock > 0 ? stock : 1;
+            if (stock <= 0 && policy === "Deny") {
+                qtyInput.value = 0;
+            } else if (!qtyInput.value || parseInt(qtyInput.value, 10) < 1) {
+                qtyInput.value = 1;
+            } else {
+                var current = parseInt(qtyInput.value, 10);
+                if (stock > 0 && current > stock && policy === "Deny") {
+                    qtyInput.value = stock;
+                }
+            }
+        }
+
+        // Initialize all selects on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('select[name="variantId"]').forEach(function (s) {
+                updateQtyMax(s);
+            });
+        });
+    </script>
+}

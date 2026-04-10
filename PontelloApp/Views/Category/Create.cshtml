@@ -1,0 +1,52 @@
+﻿@model PontelloApp.Models.Category
+
+@{
+    ViewData["Title"] = "Create";
+}
+<div class="mb-1">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <em class="bi bi-arrow-left"></em> Back to Categories
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <h1>Create Category/SubCategory</h1>
+    <hr />
+
+    <div class="col-md-7">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" list="NameList" class="form-control" placeholder="Enter category name" />
+                <datalist id="NameList">
+                    <option value="Nuts & Bolts"></option>
+                </datalist>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label>Parent Category</label>
+                <p class="form-control-plaintext border rounded px-2 py-1 bg-light mt-2">
+                    @(ViewBag.FullCategory ?? "Root Category")
+                </p>
+
+                <input type="hidden" asp-for="ParentCategoryID" />
+            </div>
+            <div class="mb-3 d-flex justify-content-start">
+                <input type="submit" value="Create" class="btn btn-gray" />
+            </div>
+
+            <div class="mt-3">
+                <a asp-action="Index" class="text-decoration-none">&larr; Back to Category List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

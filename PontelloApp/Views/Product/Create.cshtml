@@ -1,0 +1,628 @@
+@model PontelloApp.Models.Product
+
+<div class="mb-3">
+    <partial name="_BackToList" />
+</div>
+
+<partial name="_addVendorModal" />
+<partial name="_addCategoryModal" />
+
+<h2 class="text-center mb-4">Create Product</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success shadow-sm">@Html.Raw(TempData["Success"])</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger shadow-sm">@Html.Raw(TempData["Error"])</div>
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold d-flex justify-content-between align-items-center" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#csvImportBody">
+        Import Products (CSV)
+        <i class="bi bi-chevron-down" id="csvToggleIcon"></i>
+    </div>
+    <div class="collapse" id="csvImportBody">
+        <div class="card-body">
+            <p class="small text-muted"><strong>Instructions:</strong></p>
+            <ul class="small text-muted">
+                <li>Download template CSV (includes example rows).</li>
+                <li>Do not change column names.</li>
+                <li>Save as <strong>.csv</strong> and upload below.</li>
+            </ul>
+            <a asp-action="DownloadTemplate" asp-controller="Product" class="btn btn-sm btn-outline-secondary">Download CSV Template</a>
+            <form asp-action="InsertFromCsv" asp-controller="Product" method="post" enctype="multipart/form-data" class="mt-3">
+                <div class="input-group">
+                    <input type="file" class="form-control" name="csvFile" accept=".csv" required />
+                    <button type="submit" class="btn btn-outline-primary">Upload</button>
+                </div>
+                <div class="text-danger mt-2">@Html.Raw(TempData["Feedback"])</div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold">Product Information</div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="ProductName" class="form-label">Product Name <span class="text-danger">*</span></label>
+                        <input asp-for="ProductName" class="form-control" id="productname" placeholder="Enter product name" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Handle" class="form-label">
+                            Handle <span class="text-danger">*</span>
+                            <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Lowercase letters and hyphens only"></i>
+                        </label>
+                        <input asp-for="Handle" class="form-control" id="handle" placeholder="e.g., my-product-name" />
+                        <span asp-validation-for="Handle" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="VendorID" class="form-label">Vendor <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addVendorModal" type="button">+</button>
+                            <select asp-for="VendorID" class="form-select" asp-items="ViewBag.VendorID">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="VendorID" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Type" class="form-label">Type</label>
+                        <input asp-for="Type" class="form-control" id="type" placeholder="Accessories, Hardware..." />
+                        <span asp-validation-for="Type" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Tag" class="form-label">Tags</label>
+                        <input asp-for="Tag" class="form-control" id="tag" placeholder="Comma separated keywords" />
+                        <span asp-validation-for="Tag" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label">Description <span class="text-danger">*</span></label>
+                        <textarea asp-for="Description" rows="7" class="form-control" id="description" placeholder="Product description"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" asp-for="IsActive" />
+                        <label class="form-check-label" asp-for="IsActive"></label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" asp-for="IsTaxable" />
+                        <label class="form-check-label" asp-for="IsTaxable"></label>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" asp-for="IsUnlisted" />
+                        <label class="form-check-label" asp-for="IsUnlisted">
+                            Is Unlisted
+                            <i class="bi bi-info-circle text-primary" data-bs-toggle="tooltip" title="Hidden from catalog but usable for internal orders"></i>
+                        </label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CategoryID" class="form-label">Category <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#addCategoryModal" type="button">+</button>
+                            <select asp-for="CategoryID" class="form-select" asp-items="ViewBag.CategoryID"></select>
+                        </div>
+                        <span asp-validation-for="CategoryID" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input type="hidden" name="HasVariants" value="false" />
+                            <input class="form-check-input" type="checkbox" id="hasVariants" name="HasVariants" value="true" @(Model?.Variants?.Any() == true ? "checked" : "") />
+                            <label class="form-check-label" for="hasVariants">This product has variants</label>
+                        </div>
+                        <div class="small text-muted mt-1">
+                            Toggle to add multiple variants inline. If off, enter price/cost/stock for single-product.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single product pricing (only submitted when HasVariants = false) -->
+            <div id="singlePricing" class="border rounded p-3 mb-3">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label class="form-label">Price <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control currency-field" id="price" name="UnitPrice" placeholder="0.00" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Cost</label>
+                        <input type="text" class="form-control currency-field" id="cost" name="CostPrice" placeholder="0.00" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Compare At</label>
+                        <input type="text" class="form-control currency-field" id="compareat" name="CompareAtPrice" placeholder="0.00" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="stock" name="StockQuantity" placeholder="0" min="0" />
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label">SKU</label>
+                        <input type="text" class="form-control" id="sku" name="SKU_ExternalID" maxlength="50" placeholder="e.g., 1150" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Barcode</label>
+                        <input type="text" class="form-control" id="barcode" name="Barcode" maxlength="50" placeholder="e.g., AX1150" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Size</label>
+                        <input type="text" class="form-control" id="weight" name="Weight" placeholder="0.0000000" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,7})/)[0];" />
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Unit</label>
+                        <select class="form-select" name="Unit">
+                            <option value="oz">oz</option>
+                            <option value="lb">lb</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Inventory Policy
+                            <i class="bi bi-info-circle ms-1 text-primary" data-bs-toggle="tooltip"
+                               title="Deny — Block purchases when stock is zero. Continue — Allow purchases when stock is zero (backorder)."></i>
+                        </label>
+                        <select class="form-select" name="InventoryPolicy">
+                            <option value="">--</option>
+                            <option value="Continue">Continue</option>
+                            <option value="Deny">Deny</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Status</label>
+                        <div>
+                            <input type="hidden" name="Status" value="false" />
+                            <input type="checkbox" class="form-check-input" name="Status" value="true" />
+                            <span class="small ms-2">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variants UI (only when HasVariants = true). Uses model-binding-friendly names consistent with ProductVariant and Variant models -->
+            <div id="variantsArea" class="mb-3" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Variants</strong>
+                    <button type="button" id="addVariantBtn" class="btn btn-sm btn-outline-primary">Add Variant</button>
+                </div>
+
+                <div id="variantList">
+                    @* Client will add variant rows. Each added variant emits a hidden Variants.Index and nested Options.Index inputs so ASP.NET model binder binds collections. *@
+                </div>
+
+                <template id="variantTemplate">
+                    <div class="card mb-3 p-3 variant-row" data-variant-index="__VINDEX__">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <strong>Variant</strong>
+                                <div class="small text-muted">Provide SKU, price, stock and option name/value pairs.</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary add-option">Add Option</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-variant">Remove</button>
+                            </div>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <label class="form-label small">SKU</label>
+                                <input type="text" class="form-control form-control-sm" id="sku" name="Variants[__VINDEX__].SKU_ExternalID" maxlength="50" placeholder="e.g., 1150" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small">Price <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm variant-currency currency-field" id="price" name="Variants[__VINDEX__].UnitPrice" placeholder="0.00" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label small">Cost</label>
+                                <input type="text" class="form-control form-control-sm variant-currency currency-field" id="cost" name="Variants[__VINDEX__].CostPrice" placeholder="0.00" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label small">Compare At</label>
+                                <input type="text" class="form-control form-control-sm variant-currency currency-field" id="compareat" name="Variants[__VINDEX__].CompareAtPrice" placeholder="0.00" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,2})/)[0];" />
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label small">Stock</label>
+                                <input type="number" class="form-control form-control-sm" id="stock" name="Variants[__VINDEX__].StockQuantity" min="0" />
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label small">Barcode</label>
+                                <input type="text" class="form-control form-control-sm" id="barcode" name="Variants[__VINDEX__].Barcode" maxlength="50" placeholder="e.g., AX1150" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small">Weight</label>
+                                <input type="text" class="form-control form-control-sm" id="weight" name="Variants[__VINDEX__].Weight" placeholder="0.0000000" inputmode="decimal" oninput="this.value=this.value.match(/^\d*(\.?\d{0,7})/)[0];" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small">Status</label>
+                                <div>
+                                    <input type="hidden" name="Variants[__VINDEX__].Status" value="false" />
+                                    <input type="checkbox" class="form-check-input" name="Variants[__VINDEX__].Status" value="true" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label small">Unit</label>
+                                <select class="form-select form-select-sm" name="Variants[__VINDEX__].Unit">
+                                    <option value="oz">oz</option>
+                                    <option value="lb">lb</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small">Inventory Policy
+                                    <i class="bi bi-info-circle ms-1 text-primary" data-bs-toggle="tooltip"
+                                       title="Deny — Block purchases when stock is zero. Continue — Allow purchases when stock is zero (backorder)."></i>
+                                </label>
+                                <select class="form-select form-select-sm" name="Variants[__VINDEX__].InventoryPolicy">
+                                    <option value="">--</option>
+                                    <option value="Continue">Continue</option>
+                                    <option value="Deny">Deny</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label small">Options (Name / Value) — add as many as needed</label>
+                            <div class="options-container"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <button type="button" onclick="fillForm()">Autofill</button>
+
+            <div class="d-flex justify-content-end mt-4">
+                <a asp-action="Index" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+           // Tooltips
+           document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+
+        function fillForm() {
+               document.getElementById("productname").value = "Steering Shaft";
+               document.getElementById("handle").value = "steering-shaft";
+               document.getElementById("description").value =
+                         "The Steering Shaft (23\" Standard) by Charger Racing Chassis is a precision-machined steering component engineered to provide smooth, consistent steering input in competitive karting applications. Built for strength and accurate fitment, this shaft maintains proper alignment between the steering wheel and front-end linkage while withstanding repeated steering loads and vibration. Designed as a direct-fit replacement, it supports reliable steering feel and long-term serviceability. " +
+                         "Application: Used as the primary steering shaft connecting the steering wheel hub to the steering system on Charger chassis platforms. Ideal for new chassis builds, steering system repairs, or replacing worn or damaged shafts. " +
+                         "Special-order part — please allow up to 3 business days for shipment prior to dispatch. Verify length and spline compatibility before installation.";
+               document.getElementById("type").value = "Steering Components";
+               document.getElementById("tag").value = "Steering Components";
+              // document.getElementById("vendor").value = "Charger Racing Chassis";
+              document.getElementById("price").value = "49.38";
+              document.getElementById("cost").value = "45.50";
+              document.getElementById("compareat").value = "30.00";
+              document.getElementById("stock").value = "1";
+              document.getElementById("sku").value = "1081";
+              document.getElementById("barcode").value = "SS1081N";
+              document.getElementById("weight").value = "2267.96185";
+           }
+
+           // CSV arrow toggle
+           const csvHeader = document.querySelector('#csvToggleIcon').closest('.card-header');
+           const csvIcon = document.getElementById('csvToggleIcon');
+           const csvCollapse = document.getElementById('csvImportBody');
+           csvHeader.addEventListener('click', () => {
+               const bsCollapse = bootstrap.Collapse.getInstance(csvCollapse) || new bootstrap.Collapse(csvCollapse, { toggle: false });
+               bsCollapse.toggle();
+           });
+           csvCollapse.addEventListener('shown.bs.collapse', () => { csvIcon.classList.replace('bi-chevron-down','bi-chevron-up'); });
+           csvCollapse.addEventListener('hidden.bs.collapse', () => { csvIcon.classList.replace('bi-chevron-up','bi-chevron-down'); });
+
+           // Variants UI + model binding helpers
+           const hasVariants = document.getElementById('hasVariants');
+           const variantsArea = document.getElementById('variantsArea');
+           const singlePricing = document.getElementById('singlePricing');
+           const addVariantBtn = document.getElementById('addVariantBtn');
+           const variantList = document.getElementById('variantList');
+           const variantTemplate = document.getElementById('variantTemplate');
+           let variantIndex = 0;
+
+           // disable/enable single-pricing inputs when variants are used to avoid posting duplicate fields
+           function setSinglePricingDisabled(disabled) {
+               singlePricing.querySelectorAll('input, select, textarea').forEach(el => {
+                   if (disabled) el.setAttribute('disabled', 'disabled');
+                   else el.removeAttribute('disabled');
+               });
+           }
+
+           function toggleVariantUI() {
+               if (hasVariants.checked) {
+                   variantsArea.style.display = '';
+                   singlePricing.style.display = 'none';
+                   setSinglePricingDisabled(true);
+                   if (!variantList.querySelector('.variant-row')) addVariant();
+               } else {
+                   variantsArea.style.display = 'none';
+                   singlePricing.style.display = '';
+                   setSinglePricingDisabled(false);
+                   document.querySelectorAll('input[name="Variants.Index"]').forEach(i => i.remove());
+                   variantList.innerHTML = '';
+                   variantIndex = 0;
+               }
+           }
+
+           hasVariants.addEventListener('change', toggleVariantUI);
+
+           function addVariant() {
+               const idx = variantIndex++;
+               // hidden index for model binder
+               const indexInput = document.createElement('input');
+               indexInput.type = 'hidden';
+               indexInput.name = 'Variants.Index';
+               indexInput.value = idx;
+               variantList.appendChild(indexInput);
+
+               const html = variantTemplate.innerHTML.replace(/__VINDEX__/g, idx);
+               variantList.insertAdjacentHTML('beforeend', html);
+
+               const card = variantList.querySelector(`.variant-row[data-variant-index="${idx}"]`) || variantList.lastElementChild;
+               if (!card) return;
+               card.dataset.variantIndex = idx;
+               card.dataset.optionIndex = '0';
+
+               // add initial option so ProductVariant.Options isn't empty (ProductVariant requires Options)
+               addOptionRow(card);
+
+               // attach formatting handlers
+               attachCurrencyHandlers(card);
+
+               // remove button handler
+               const removeBtn = card.querySelector('.remove-variant');
+               if (removeBtn) removeBtn.addEventListener('click', () => {
+                   document.querySelectorAll(`input[name="Variants.Index"][value="${idx}"]`).forEach(i => i.remove());
+                   card.remove();
+               });
+           }
+
+           addVariantBtn && addVariantBtn.addEventListener('click', addVariant);
+
+           // delegate option add/remove
+           variantList.addEventListener('click', function (e) {
+               const card = e.target.closest('.variant-row');
+               if (!card) return;
+               if (e.target.closest('.add-option')) {
+                   addOptionRow(card);
+                   return;
+               }
+               if (e.target.closest('.remove-option')) {
+                   e.target.closest('.option-row').remove();
+                   return;
+               }
+           });
+
+           function addOptionRow(card) {
+               const vIndex = card.dataset.variantIndex;
+               let oIndex = parseInt(card.dataset.optionIndex || '0', 10);
+               const container = card.querySelector('.options-container');
+
+               // nested Options.Index for binder
+               const idxHidden = document.createElement('input');
+               idxHidden.type = 'hidden';
+               idxHidden.name = `Variants[${vIndex}].Options.Index`;
+               idxHidden.value = oIndex;
+               container.appendChild(idxHidden);
+
+               const row = document.createElement('div');
+               row.className = 'd-flex gap-2 align-items-center mb-2 option-row';
+               row.innerHTML = `
+                   <input class="form-control form-control-sm" style="max-width:45%;" name="Variants[${vIndex}].Options[${oIndex}].Name" placeholder="Name (e.g., Size)" />
+                   <input class="form-control form-control-sm" style="max-width:45%;" name="Variants[${vIndex}].Options[${oIndex}].Value" placeholder="Value (e.g., M)" />
+                   <button type="button" class="btn btn-sm btn-outline-danger remove-option"><i class="bi bi-x-lg"></i></button>
+               `;
+               container.appendChild(row);
+
+               card.dataset.optionIndex = (++oIndex).toString();
+           }
+
+           // currency formatting helpers (applies to both single and variant inputs)
+           function formatCurrencyValue(raw) {
+               if (raw === null || raw === undefined) return '';
+               const cleaned = String(raw).replace(/[^\d.-]/g, '').replace(',', '.');
+               const n = parseFloat(cleaned);
+               if (isNaN(n)) return '';
+               return n.toFixed(2);
+           }
+           function onCurrencyBlur(e) {
+               const el = e.target;
+               const formatted = formatCurrencyValue(el.value);
+               if (formatted !== '') el.value = formatted;
+           }
+           function attachCurrencyHandlers(root) {
+               root = root || document;
+               root.querySelectorAll('.currency-field, .variant-currency').forEach(inp => {
+                   inp.removeEventListener('blur', onCurrencyBlur);
+                   inp.addEventListener('blur', onCurrencyBlur);
+               });
+           }
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var serverCount = @(Model?.Variants?.Count() ?? 0);
+            if (serverCount > 0) variantIndex = serverCount;
+            toggleVariantUI();
+            attachCurrencyHandlers(document);
+
+            var feedback = '@TempData["Feedback"]';
+            if (feedback && feedback.trim() !== '') {
+                var csvCollapse = new bootstrap.Collapse(document.getElementById('csvImportBody'), {
+                    toggle: true
+                });
+            }
+        });
+
+    </script>
+
+    <script src="~/js/refreshDDL.js"></script>
+
+    <script type="text/javascript">
+                // ================= VENDOR =================
+        $('#submitVendorCreate').click(function (event) {
+            event.preventDefault();
+            ClearErrors();
+
+            var form = $('#createVendorForm');
+
+            if (form.valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: form.attr('action'),
+                    data: form.serialize(),
+
+                    success: function (data) {
+                        $('#addVendorModal').modal('hide');
+
+                        var ddl = $('#VendorID');
+                        ddl.empty();
+                        ddl.append($('<option/>', { value: "", text: "None" }));
+
+                        $.each(data, function (i, item) {
+                            ddl.append($('<option/>', {
+                                value: item.value,
+                                text: item.text,
+                                selected: item.selected
+                            }));
+                        });
+
+                        ddl.trigger("chosen:updated");
+                    },
+
+                    error: function (xhr) {
+                        handleAjaxError(xhr);
+                    }
+                });
+            }
+
+            return false;
+        });
+
+
+        // ================= CATEGORY =================
+        $('#submitCategoryCreate').click(function (event) {
+            event.preventDefault();
+            ClearErrors();
+
+            var form = $('#createCategoryForm');
+
+            if (form.valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: form.attr('action'),
+                    data: form.serialize(),
+
+                    success: function (data) {
+                        $('#addCategoryModal').modal('hide');
+
+                        var ddl = $('#CategoryID');
+                        ddl.empty();
+                        ddl.append($('<option/>', { value: "", text: "None" }));
+
+                        $.each(data, function (i, item) {
+                            ddl.append($('<option/>', {
+                                value: item.value,
+                                text: item.text,
+                                selected: item.selected
+                            }));
+                        });
+
+                        ddl.trigger("chosen:updated");
+                    },
+
+                    error: function (xhr) {
+                        handleAjaxError(xhr);
+                    }
+                });
+            }
+
+            return false;
+        });
+
+
+        // ================= COMMON =================
+        function handleAjaxError(xhr) {
+            var errorMessages = [];
+
+            switch (xhr.status) {
+                case 401:
+                    errorMessages.push("You must be logged in first.");
+                    break;
+                case 403:
+                    errorMessages.push("You are not authorized.");
+                    break;
+                default:
+                    errorMessages = xhr.responseText.split("|").slice(0, -1);
+            }
+
+            if (!errorMessages.some(str => str !== "")) {
+                errorMessages.push("Error: Unable to complete operation");
+            }
+
+            var ul = document.getElementById("ErrorList");
+            errorMessages.forEach(msg => {
+                var li = document.createElement("li");
+                li.innerHTML = msg;
+                ul.appendChild(li);
+            });
+        }
+
+        function ClearErrors() {
+            var ul = document.getElementById("ErrorList");
+            while (ul.firstChild) ul.removeChild(ul.firstChild);
+        }
+
+        $('#addCategoryModal').on('hide.bs.modal', function () {
+            document.getElementById("createCategoryForm").reset();//to clear the data in the popup form
+            ClearErrors();
+            var selectedOption = $('#CategoryID').val();//Return to the current selected value
+        });
+
+        $('#addVendorModal').on('hide.bs.modal', function () {
+            document.getElementById("createVendorForm").reset();//to clear the data in the popup form
+            ClearErrors();
+            var selectedOption = $('#VendorID').val();//Return to the current selected value
+        });
+    </script>
+}
+
