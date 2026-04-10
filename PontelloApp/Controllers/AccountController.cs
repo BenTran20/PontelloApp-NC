@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using PontelloApp.Custom_Controllers;
 using PontelloApp.Models;
 using PontelloApp.ViewModels;
@@ -16,12 +18,14 @@ namespace PontelloApp.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailSender _emailSender;
 
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSender = emailSender;
         }
 
         //  Auth 
@@ -123,47 +127,110 @@ namespace PontelloApp.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                ModelState.AddModelError("", "No account found with that email.");
+                ModelState.AddModelError("", "No account found.");
                 return View(model);
             }
 
-            return RedirectToAction("ChangePassword", new { username = user.UserName });
+            // Generate token
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var encodedToken = System.Net.WebUtility.UrlEncode(token);
+
+            // Redirect
+            var link = Url.Action("ChangePassword", "Account", new
+            {
+                email = user.Email,
+                token = encodedToken
+            }, Request.Scheme);
+
+            var message = $@"
+            <div style='font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;'>
+                <div style='max-width:600px; margin:0 auto; background:#ffffff; border-radius:10px; overflow:hidden; border:1px solid #ddd;'>
+
+                    <div style='background:#198754; color:white; padding:20px; text-align:center;'>
+                        <h2 style='margin:0;'>Password Reset Request</h2>
+                    </div>
+
+                    <div style='padding:30px; color:#333; font-size:15px; line-height:1.6;'>
+
+                        <p>Hi,</p>
+
+                        <p>We received a request to reset your password.</p>
+
+                        <p style='margin-top:20px;'>
+                            Click the button below to reset your password:
+                        </p>
+
+                        <div style='text-align:center; margin:30px 0;'>
+                            <a href='{link}' 
+                               style='background:#198754; color:white; padding:12px 25px; text-decoration:none; border-radius:6px; display:inline-block; font-weight:bold;'>
+                                Reset Password
+                            </a>
+                        </div>
+
+                        <p style='color:#777; font-size:13px;'>
+                            If you didn’t request this, you can safely ignore this email.
+                        </p>
+
+                    </div>
+
+                    <div style='background:#f1f1f1; padding:15px; text-align:center; font-size:12px; color:#888;'>
+                        © PontelloApp - All rights reserved
+                    </div>
+
+                </div>
+            </div>";
+
+            await _emailSender.SendEmailAsync(user.Email, "Reset Password", message);
+
+            TempData["SuccessMessage"] = "Check your email to reset password.";
+            return View();
         }
 
-        public IActionResult ChangePassword(string username)
+        public IActionResult ChangePassword(string email, string token)
         {
-            if (string.IsNullOrEmpty(username))
+            if (email == null || token == null)
                 return RedirectToAction("VerifyEmail");
 
-            return View(new ChangePasswordVM { Email = username });
+            return View(new ChangePasswordVM
+            {
+                Email = email,
+                Token = token
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordVM model)
         {
-            if (!ModelState.IsValid)
-            {
-                ModelState.AddModelError(string.Empty, "Something went wrong.");
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Email not found.");
+                ModelState.AddModelError("", "User not found.");
                 return View(model);
             }
 
-            var remove = await _userManager.RemovePasswordAsync(user);
-            if (!remove.Succeeded)
+            var decodedToken = System.Net.WebUtility.UrlDecode(model.Token);
+
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                decodedToken,
+                model.NewPassword
+            );
+
+            if (result.Succeeded)
             {
-                foreach (var e in remove.Errors)
-                    ModelState.AddModelError(string.Empty, e.Description);
-                return View(model);
+                TempData["SuccessMessage"] = "Password changed successfully!";
+                return RedirectToAction("Login");
             }
+            else
+            {
+                foreach (var e in result.Errors)
+                    ModelState.AddModelError("", e.Description);
 
-            await _userManager.AddPasswordAsync(user, model.NewPassword);
-            return RedirectToAction("Login");
+                return View(model);
+            }    
         }
 
         [HttpPost]
