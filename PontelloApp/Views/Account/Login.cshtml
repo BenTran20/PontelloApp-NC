@@ -8,6 +8,22 @@
         <form asp-action="Login" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success text-center fade show" role="alert" id="successAlert">
+                    @TempData["SuccessMessage"]
+                </div>
+
+                <script>
+                    setTimeout(() => {
+                        var alert = document.getElementById("successAlert");
+                        if (alert) {
+                            alert.style.display = "none";
+                        }
+                    }, 3000);
+                </script>
+            }
+
             <!-- Email -->
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
