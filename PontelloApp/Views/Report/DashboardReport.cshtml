@@ -9,215 +9,286 @@
 
     var totalRevenue = ViewData["TotalRevenue"];
     var totalOrders = ViewData["TotalOrders"];
+    var avgOrderValue = ViewData["AvgOrderValue"];
 
     var topProducts = ViewBag.TopProducts;
     var revenueTrends = ViewBag.RevenueTrends;
+
+    var customerSummary = ViewBag.CustomerSummary;
+    var topCustomers = ViewBag.TopCustomers;
+    var locationStats = ViewBag.LocationStats;
 }
 
 <style>
+    :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --shadow: 0 6px 18px rgba(0,0,0,0.06);
+        --radius: 14px;
+    }
+
     body {
-        font-family: "Segoe UI", sans-serif;
-        color: #333;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
     }
 
+    .dash {
+        padding: 24px;
+        max-width: 1400px;
+        margin: auto;
+    }
+
+    /* HEADER */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    /* CARD */
     .card {
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
-        padding: 20px;
         background: #fff;
-        transition: 0.2s;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(0,0,0,0.04);
     }
 
-        .card:hover {
-            transform: translateY(-2px);
+    /* FILTER */
+    .filter {
+        background: #fff;
+        padding: 16px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 18px;
+    }
+
+    /* STATS */
+    .stat {
+        padding: 18px;
+        text-align: center;
+    }
+
+        .stat .value {
+            font-weight: 700;
         }
 
-    h2, h5 {
-        color: #222;
-        margin-bottom: 15px;
+    /* SECTION */
+    .section-title {
+        font-weight: 600;
+        margin-bottom: 12px;
     }
 
-    .stat-value {
-        font-size: 1.8rem;
+    /* TABLE CLEAN (no font override) */
+    table th {
+        color: var(--muted);
         font-weight: 600;
     }
 
-    .filter-box {
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
-        background: #f9f9f9;
-        margin-bottom: 25px;
-    }
-
-        .filter-box label {
-            font-weight: 500;
-        }
-
-    .badge-status {
-        padding: 5px 10px;
-        border-radius: 8px;
-        font-size: 12px;
-        color: #fff;
-        display: inline-block;
-    }
-
-    .badge-Submitted {
-        background: #6c757d;
-    }
-
-    .badge-Approved {
-        background: #198754;
-    }
-
-    .badge-Shipped {
-        background: #0d6efd;
-    }
-
-    .badge-Rejected {
-        background: #dc3545;
-    }
-
-    .table th, .table td {
+    table td {
         vertical-align: middle;
     }
 
-    .table-hover tbody tr:hover {
-        background-color: #f5f5f5;
+    /* BADGE */
+    .badge-status {
+        padding: 4px 10px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 500;
+        display: inline-block;
     }
 
-    .btn-outline-secondary, .btn-outline-success, .btn-outline-danger {
-        border-radius: 6px;
-        font-size: 0.9rem;
+    .Submitted {
+        background: #6b7280;
+    }
+
+    .Approved {
+        background: #16a34a;
+    }
+
+    .Shipped {
+        background: #2563eb;
+    }
+
+    .Rejected {
+        background: #dc3545;
+    }
+
+    /* BUTTON CLEAN */
+    .btn {
+        border-radius: 10px;
+    }
+
+    input, select {
+        border-radius: 10px !important;
     }
 </style>
 
-<div class="container-fluid">
+<div class="dash">
 
     <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="header">
         <h2>Dashboard</h2>
-        <div class="d-flex gap-2">
-            <a asp-action="ExportSalesCsv" class="btn btn-outline-success btn-sm">CSV</a>
-            <a asp-action="ExportSalesPdf" class="btn btn-outline-danger btn-sm">PDF</a>
+
+        <div class="btn-group">
+            <a asp-action="ExportSalesCsv" class="btn btn-sm btn-outline-success">CSV</a>
+            <a asp-action="ExportSalesPdf" class="btn btn-sm btn-outline-danger">PDF</a>
         </div>
     </div>
 
     <!-- FILTER -->
-    <form method="get" class="filter-box">
+    <form class="filter" method="get">
         <div class="row g-3">
+
             <div class="col-md-3">
                 <label>From</label>
                 <input type="date" name="fromDate" value="@ViewData["FromDate"]" class="form-control" />
             </div>
+
             <div class="col-md-3">
                 <label>To</label>
                 <input type="date" name="toDate" value="@ViewData["ToDate"]" class="form-control" />
             </div>
+
             <div class="col-md-3">
                 <label>Status</label>
                 <select name="status" class="form-select">
                     <option value="">All</option>
-                    @foreach (var s in statuses.Where(s => s != PontelloApp.Models.OrderStatus.Draft && s != PontelloApp.Models.OrderStatus.Progress))
+                    @foreach (var s in statuses)
                     {
-                        <option value="@s" selected="@(s.Equals(selectedStatus) ? "selected" : null)">
-                            @s
-                        </option>
+                        <option value="@s" selected="@(s.Equals(selectedStatus))">@s</option>
                     }
                 </select>
             </div>
 
-            <div class="col-md-3 d-flex align-items-end">
-                <div class="d-flex gap-2 w-100">
-                    <button type="submit" class="btn btn-primary w-50">Apply Filter</button>
-                    <a href="@Url.Action("DashboardReport")" class="btn btn-secondary w-50">Reset</a>
-                </div>
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button class="btn btn-primary w-50">Apply</button>
+                <a class="btn btn-light w-50" href="@Url.Action("DashboardReport")">Reset</a>
             </div>
+
         </div>
     </form>
 
     <!-- STATS -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card text-center">
-                <h5>Total Revenue</h5>
-                <div class="stat-value text-success">$@String.Format("{0:N2}", totalRevenue)</div>
-                <small class="text-muted">Based on completed orders</small>
+    <div class="row g-3 mb-3">
+
+        <div class="col-md-3">
+            <div class="card stat">
+                <h6>Total Revenue</h6>
+                <div class="value text-success">$@String.Format("{0:N2}", totalRevenue)</div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card text-center">
-                <h5>Total Orders</h5>
-                <div class="stat-value">@totalOrders</div>
-                <small class="text-muted">Filtered results</small>
+
+        <div class="col-md-3">
+            <div class="card stat">
+                <h6>Total Orders</h6>
+                <div class="value">@totalOrders</div>
             </div>
         </div>
+
+        <div class="col-md-3">
+            <div class="card stat">
+                <h6>Avg Order Value</h6>
+                <div class="value">$@String.Format("{0:N2}", avgOrderValue)</div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat">
+                <h6>Returning Customers</h6>
+                <div class="value text-primary">@customerSummary?.ReturningCustomers</div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- CHART + TOP PRODUCTS -->
-    <div class="row mb-4">
-        <div class="col-lg-8 col-md-12 mb-3 mb-lg-0">
-            <div class="card" style="height: 100%;">
-                <h5>Revenue Trend</h5>
-                <div style="position: relative; height:250px;">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-12">
-            <div class="card">
-                <h5>Top Products</h5>
-                <table class="table table-sm mb-0">
-                    <thead>
+    <!-- CHART -->
+    <div class="card p-3 mb-3">
+        <div class="section-title">Revenue Trend</div>
+        <canvas id="revenueChart" height="100"></canvas>
+    </div>
+
+    <!-- TOP SECTION -->
+    <div class="row g-3 mb-3">
+
+        <div class="col-md-6">
+            <div class="card p-3">
+                <div class="section-title">Top Products</div>
+                <table class="table table-sm">
+                    @foreach (var p in topProducts)
+                    {
                         <tr>
-                            <th>Product</th>
-                            <th>Qty</th>
+                            <td>@p.ProductName</td>
+                            <td class="text-end">@p.QuantitySold</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var p in topProducts)
-                        {
-                            <tr>
-                                <td>@p.ProductName</td>
-                                <td>@p.QuantitySold</td>
-                            </tr>
-                        }
-                    </tbody>
+                    }
                 </table>
             </div>
         </div>
+
+        <div class="col-md-6">
+            <div class="card p-3">
+                <div class="section-title">Top Customers</div>
+                <table class="table table-sm">
+                    @foreach (var c in topCustomers)
+                    {
+                        <tr>
+                            <td>@c.Email</td>
+                            <td>@c.OrderCount</td>
+                            <td class="text-end">$@String.Format("{0:N2}", c.TotalRevenue)</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ORDERS TABLE -->
-    <div class="card">
-        <h5>Orders</h5>
-        <table class="table table-hover mb-0">
-            <thead class="table-light">
+    <!-- LOCATION -->
+    <div class="card p-3 mb-3">
+        <div class="section-title">Revenue by Location</div>
+        <table class="table table-sm">
+            @foreach (var l in locationStats)
+            {
+                <tr>
+                    <td>@l.City</td>
+                    <td>@l.TotalOrders</td>
+                    <td class="text-end">$@String.Format("{0:N2}", l.TotalRevenue)</td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="card p-3">
+        <div class="section-title">Recent Orders</div>
+
+        <table class="table table-hover align-middle">
+            <thead>
                 <tr>
                     <th>PO</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Customer</th>
                     <th>Total</th>
-                    <th></th>
                 </tr>
             </thead>
+
             <tbody>
                 @foreach (var o in Model)
                 {
                     <tr>
-                        <td class="fw-semibold">@o.PONumber</td>
+                        <td>@o.PONumber</td>
                         <td>@o.CreatedAt</td>
                         <td>
-                            <span class="badge-status badge-@o.Status">
-                                @o.Status
-                            </span>
+                            <span class="badge-status @o.Status">@o.Status</span>
                         </td>
                         <td>@o.Shipping?.FullName</td>
-                        <td class="fw-semibold">$@o.TotalAmount</td>
-                        <td>
-                            <a asp-action="PrintOrder" asp-route-poNumber="@o.PONumber" class="btn btn-sm btn-outline-secondary">Print</a>
-                        </td>
+                        <td>$@o.TotalAmount</td>
                     </tr>
                 }
             </tbody>
@@ -229,29 +300,21 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const revenueData = @Html.Raw(JsonSerializer.Serialize(revenueTrends));
-    const labels = revenueData.map(x => x.Date);
-    const data = revenueData.map(x => x.Revenue);
 
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(ctx, {
+    new Chart(document.getElementById('revenueChart'), {
         type: 'line',
         data: {
-            labels: labels,
+            labels: revenueData.map(x => x.Date),
             datasets: [{
-                label: 'Revenue',
-                data: data,
+                data: revenueData.map(x => x.Revenue),
                 borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13,110,253,0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3
+                tension: 0.35,
+                fill: true
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false, 
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            responsive: true
         }
     });
 </script>
