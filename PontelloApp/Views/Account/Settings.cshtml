@@ -148,6 +148,15 @@
                                     new { @class = "form-select editable-field", disabled = "disabled" }
                                  )
                             </div>
+                             <div id="state">
+                                 <label class="form-label">State</label>
+                                    @Html.DropDownListFor(
+                                       s => s.State,
+                                       stateList,
+                                       "Select a State",
+                                       new { @class = "form-select editable-field", disabled = "disabled" }
+                                    )
+                            </div>
                     </div>
                     <div class="col-sm-2">
                         <label class="form-label">Postal / ZIP</label>
@@ -234,7 +243,7 @@
 
          // For selecting Province or State depending on chosen country
          function toggleRegionDropdowns() {
-             const country = document.getElementById("country").value;
+             const country = document.getElementById("Country").value;
              const province = document.getElementById("province");
              const state = document.getElementById("state");
         
