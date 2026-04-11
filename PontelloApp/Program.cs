@@ -136,11 +136,8 @@ using (var scope = app.Services.CreateScope())
 
     await ApplicationDbInitializer.Initialize(serviceProvider: services, useMigrations: true, seedSampleData: true);
 
-    PontelloAppInitializer.Initialize(serviceProvider: services, DeleteDatabase: false,
+    PontelloAppInitializer.Initialize(serviceProvider: services, DeleteDatabase: true,
         UseMigrations: true, SeedSampleData: true);
-
-   var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-   db.Database.Migrate();
 }
 
 QuestPDF.Settings.License = LicenseType.Community;
