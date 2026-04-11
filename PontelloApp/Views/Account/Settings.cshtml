@@ -10,6 +10,29 @@
     var initials = $"{Model.FirstName?[0]}{Model.LastName?[0]}".ToUpper();
 }
 
+ @{
+    var provinces = new List<string>
+           {
+           "Alberta","British Columbia","Manitoba","New Brunswick","Newfoundland and Labrador",
+           "Northwest Territories","Nova Scotia","Nunavut","Ontario","Prince Edward Island",
+           "Quebec","Saskatchewan","Yukon"
+           };
+    var states = new List<string>
+           {
+           "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
+           "Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
+           "Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan",
+           "Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
+           "New Hampshire","New Jersey","New Mexico","New York","North Carolina",
+           "North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
+           "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
+           "Virginia","Washington","West Virginia","Wisconsin","Wyoming"
+           };
+
+     var provinceList = new SelectList(provinces);
+     var stateList = new SelectList(states);
+  }
+
 <div class="container-fluid py-4" style="max-width: 960px;">
     <div class="row g-4">
 
@@ -116,22 +139,17 @@
                         <input type="text" name="City" value="@Model.City" class="form-control editable-field" disabled />
                     </div>
                     <div class="col-sm-3">
-                        <label class="form-label">Province / State</label>
-                        <select asp-for="Province" class="form-select editable-field" disabled>
-                            <option value="Alberta">Alberta</option>
-                            <option value="British Columbia">British Columbia</option>
-                            <option value="Manitoba">Manitoba</option>
-                            <option value="New Brunswick">New Brunswick</option>
-                            <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
-                            <option value="Northwest Territories">Northwest Territories</option>
-                            <option value="Nova Scotia">Nova Scotia</option>
-                            <option value="Nunavut">Nunavut</option>
-                            <option value="Ontario">Ontario</option>
-                            <option value="Prince Edward Island">Prince Edward Island</option>
-                            <option value="Quebec">Quebec</option>
-                            <option value="Saskatchewan">Saskatchewan</option>
-                            <option value="Yukon">Yukon</option>
-                        </select>
+                        <label class="form-label">Province</label>
+                         <div class="col-sm-3">
+                             <div id="province">
+                                 <label class="form-label">Province</label>
+                                 @Html.DropDownListFor(
+                                    p => p.Province,
+                                    provinceList,
+                                    "Select a Province",
+                                    new { @class = "form-select editable-field", disabled = "disabled" }
+                                 )
+                            </div>
                     </div>
                     <div class="col-sm-2">
                         <label class="form-label">Postal / ZIP</label>
@@ -209,10 +227,32 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+        // For editing settings
         document.getElementById("enable-edit").addEventListener("click", function () {
             document.querySelectorAll(".editable-field").forEach(el => {
                 el.disabled = false;
             });
         });
+
+         // For selecting Province or State depending on chosen country
+         function toggleRegionDropdowns() {
+             const country = document.getElementById("country").value;
+             const province = document.getElementById("province");
+             const state = document.getElementById("state");
+        
+             if (country === "Canada") {
+                 province.style.display = "block";
+                 state.style.display = "none";
+             } else {
+                 province.style.display = "none";
+                 state.style.display = "block";
+             }
+         }
+    
+     // Run on page load
+     toggleRegionDropdowns();
+    
+     // Run when country changes
+     document.getElementById("Country").addEventListener("change", toggleRegionDropdowns);
     </script>
 }
