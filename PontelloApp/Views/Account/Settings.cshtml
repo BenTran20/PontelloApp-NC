@@ -67,72 +67,89 @@
                         <div class="row g-3 mb-3">
                             <div class="col-sm-6">
                                 <label class="form-label">First name</label>
-                                <input type="text" name="FirstName" value="@Model.FirstName" class="form-control" required />
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Last name</label>
-                                <input type="text" name="LastName" value="@Model.LastName" class="form-control" required />
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="Email" value="@Model.Email" class="form-control" required />
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Phone number</label>
-                                <input type="tel" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control" />
-                            </div>
-                        </div>
-
-                        <hr class="my-3" />
-                        <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Company</p>
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-7">
-                                <label class="form-label">Company name</label>
-                                <input type="text" name="CompanyName" value="@Model.CompanyName" class="form-control" />
-                            </div>
-                            <div class="col-sm-5">
-                                <label class="form-label">
-                                    BIN / EIN
-                                    <span class="text-muted fw-normal">(optional)</span>
-                                </label>
-                                <input type="text" name="BINorEIN" value="@Model.BINorEIN" class="form-control" placeholder="12-3456789" />
-                                <div class="form-text">Marks account as tax-exempt.</div>
-                            </div>
-                        </div>
-
-                        <hr class="my-3" />
-                        <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Shipping / billing address</p>
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-7">
-                                <label class="form-label">Street address</label>
-                                <input type="text" name="AddressLine1" value="@Model.AddressLine1" class="form-control" placeholder="123 Main Street" />
-                            </div>
-                            <div class="col-sm-5">
-                                <label class="form-label">Suite / Unit <span class="text-muted fw-normal">(optional)</span></label>
-                                <input type="text" name="AddressLine2" value="@Model.AddressLine2" class="form-control" placeholder="Suite 400" />
-                            </div>
-                            <div class="col-sm-4">
-                                <label class="form-label">City</label>
-                                <input type="text" name="City" value="@Model.City" class="form-control" />
-                            </div>
-                            <div class="col-sm-3">
-                                <label class="form-label">Province / State</label>
-                                <input type="text" name="Province" value="@Model.Province" class="form-control" placeholder="ON" />
-                            </div>
-                            <div class="col-sm-2">
-                                <label class="form-label">Postal / ZIP</label>
-                                <input type="text" name="PostalCode" value="@Model.PostalCode" class="form-control" />
-                            </div>
-                            <div class="col-sm-3">
-                                <label class="form-label">Country</label>
-                                <select name="Country" class="form-select">
-                                    <option value="Canada" selected="@(Model.Country == "Canada")">Canada</option>
-                                    <option value="United States" selected="@(Model.Country == "United States")">United States</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2 mt-3">
+                                        <input type="text" name="FirstName" value="@Model.FirstName" class="form-control editable-field" required disabled />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Last name</label>
+                        <input type="text" name="LastName" value="@Model.LastName" class="form-control editable-field" required disabled />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="Email" value="@Model.Email" class="form-control editable-field" required disabled />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Phone number</label>
+                        <input type="tel" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control editable-field" disabled />
+                    </div>
+                </div>
+                
+                <hr class="my-3" />
+                <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Company</p>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <label class="form-label">Company name</label>
+                        <input type="text" name="CompanyName" value="@Model.CompanyName" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label">
+                            BIN / EIN
+                            <span class="text-muted fw-normal">(optional)</span>
+                        </label>
+                        <input type="text" name="BINorEIN" value="@Model.BINorEIN" class="form-control editable-field" placeholder="12-3456789" disabled />
+                        <div class="form-text">Marks account as tax-exempt.</div>
+                    </div>
+                </div>
+                
+                <hr class="my-3" />
+                <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Shipping / billing address</p>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <label class="form-label">Street address</label>
+                        <input type="text" name="AddressLine1" value="@Model.AddressLine1" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label">Suite / Unit <span class="text-muted fw-normal">(optional)</span></label>
+                        <input type="text" name="AddressLine2" value="@Model.AddressLine2" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">City</label>
+                        <input type="text" name="City" value="@Model.City" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label">Province / State</label>
+                        <select asp-for="Province" class="form-select editable-field" disabled>
+                            <option value="Alberta">Alberta</option>
+                            <option value="British Columbia">British Columbia</option>
+                            <option value="Manitoba">Manitoba</option>
+                            <option value="New Brunswick">New Brunswick</option>
+                            <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                            <option value="Northwest Territories">Northwest Territories</option>
+                            <option value="Nova Scotia">Nova Scotia</option>
+                            <option value="Nunavut">Nunavut</option>
+                            <option value="Ontario">Ontario</option>
+                            <option value="Prince Edward Island">Prince Edward Island</option>
+                            <option value="Quebec">Quebec</option>
+                            <option value="Saskatchewan">Saskatchewan</option>
+                            <option value="Yukon">Yukon</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <label class="form-label">Postal / ZIP</label>
+                        <input type="text" name="PostalCode" value="@Model.PostalCode" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label">Country</label>
+                        <select name="Country" class="form-select editable-field" disabled>
+                            <option value="Canada" selected="@(Model.Country == "Canada")">Canada</option>
+                            <option value="United States" selected="@(Model.Country == "United States")">United States</option>
+                        </select>
+                    </div>
+                </div>
+                
+                      <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button id="enable-edit" type="button" class="btn btn-dark">
+                                Edit
+                            </button>
                             <button type="submit" class="btn btn-dark">
                                 Save changes
                             </button>
@@ -190,4 +207,12 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById("enable-edit").addEventListener("click", function () {
+            document.querySelectorAll(".editable-field").forEach(el => {
+                el.disabled = false;
+            });
+        });
+    </script>
 }
