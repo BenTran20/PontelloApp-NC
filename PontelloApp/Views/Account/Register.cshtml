@@ -89,9 +89,27 @@
                         <span asp-validation-for="City" class="text-danger small"></span>
                     </div>
                     <div class="col-sm-4">
+                        <div id="province">
                         <label asp-for="Province" class="form-label"></label>
-                        <input asp-for="Province" class="form-control" placeholder="ON" />
+                         @Html.DropDownListFor(
+                             p => p.Province,
+                             new SelectList(Model.Provinces),
+                             "Select a Province",
+                             new { @class = "form-select" }
+                         )
                         <span asp-validation-for="Province" class="text-danger small"></span>
+                        </div>
+
+                        <div id="state">
+                        <label asp-for="State" class="form-label"></label>
+                        @Html.DropDownListFor(                                                
+                            m => m.State,
+                            new SelectList(Model.States),
+                            "Select a State",
+                            new { @class = "form-select" }
+                        )
+                        <span asp-validation-for="State" class="text-danger small"></span>
+                        </div>
                     </div>
                     <div class="col-sm-3">
                         <label asp-for="PostalCode" class="form-label"></label>
@@ -162,4 +180,25 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        function toggleRegionDropdowns() {
+            const country = document.getElementById("Country").value;
+            const province = document.getElementById("province");
+            const state = document.getElementById("state");
+
+            if (country === "Canada") {
+                province.style.display = "block";
+                state.style.display = "none";
+            } else {
+                province.style.display = "none";
+                state.style.display = "block";
+            }
+        }
+
+        // Run on page load
+        toggleRegionDropdowns();
+
+        // Run when country changes
+        document.getElementById("Country").addEventListener("change", toggleRegionDropdowns);
+    </script>
 }
