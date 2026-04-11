@@ -54,6 +54,66 @@
         </div>
     }
 
+    <!-- Account status card -->
+    <div class="card border shadow-sm mb-3">
+        <div class="card-body">
+            <p class="text-uppercase fw-semibold mb-3 fs-7 text-secondary">Account status</p>
+
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                <!-- Current status badge -->
+                <div class="d-flex align-items-center gap-2">
+                    @switch (Model.Status)
+                    {
+                        case AccountStatus.Pending:
+                            <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">Pending approval</span>
+                            <span class="text-muted fs-8">Registered but not yet approved</span>
+                            break;
+                        case AccountStatus.Active:
+                            <span class="badge rounded-pill bg-success fs-6 px-3 py-2">Active</span>
+                            <span class="text-muted fs-8">This account can sign in</span>
+                            break;
+                        case AccountStatus.Inactive:
+                            <span class="badge rounded-pill bg-secondary fs-6 px-3 py-2">Inactive</span>
+                            <span class="text-muted fs-8">This account has been deactivated</span>
+                            break;
+                        case AccountStatus.Rejected:
+                            <span class="badge rounded-pill bg-danger fs-6 px-3 py-2">Rejected</span>
+                            <span class="text-muted fs-8">This account was rejected at registration</span>
+                            break;
+                    }
+                </div>
+
+                <!-- Action buttons -->
+                <div class="d-flex gap-2">
+                    @if (Model.Status == AccountStatus.Pending)
+                    {
+                        <form asp-action="ApprovePendingConfirmed" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-success btn-sm px-3">Approve</button>
+                        </form>
+                        <form asp-action="RejectPendingConfirmed" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm px-3">Reject</button>
+                        </form>
+                    }
+                    else if (Model.Status == AccountStatus.Active || Model.Status == AccountStatus.Inactive)
+                    {
+                        <form asp-action="ToggleActiveInactive" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm px-3 @(Model.Status == AccountStatus.Active ? "btn-outline-warning" : "btn-outline-success")">
+                                @(Model.Status == AccountStatus.Active ? "Deactivate" : "Activate")
+                            </button>
+                        </form>
+                    }
+                </div>
+
+            </div>
+        </div>
+    </div>
     <!-- Personal details card -->
     <div class="card border shadow-sm mb-3">
         <div class="card-body">
@@ -121,66 +181,7 @@
         </div>
     </div>
 
-    <!-- Account status card -->
-    <div class="card border shadow-sm mb-3">
-        <div class="card-body">
-            <p class="text-uppercase fw-semibold mb-3 fs-7 text-secondary">Account status</p>
 
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-
-                <!-- Current status badge -->
-                <div class="d-flex align-items-center gap-2">
-                    @switch (Model.Status)
-                    {
-                        case AccountStatus.Pending:
-                            <span class="badge rounded-pill bg-warning text-dark fs-6 px-3 py-2">Pending approval</span>
-                            <span class="text-muted fs-8">Registered but not yet approved</span>
-                            break;
-                        case AccountStatus.Active:
-                            <span class="badge rounded-pill bg-success fs-6 px-3 py-2">Active</span>
-                            <span class="text-muted fs-8">This account can sign in</span>
-                            break;
-                        case AccountStatus.Inactive:
-                            <span class="badge rounded-pill bg-secondary fs-6 px-3 py-2">Inactive</span>
-                            <span class="text-muted fs-8">This account has been deactivated</span>
-                            break;
-                        case AccountStatus.Rejected:
-                            <span class="badge rounded-pill bg-danger fs-6 px-3 py-2">Rejected</span>
-                            <span class="text-muted fs-8">This account was rejected at registration</span>
-                            break;
-                    }
-                </div>
-
-                <!-- Action buttons -->
-                <div class="d-flex gap-2">
-                    @if (Model.Status == AccountStatus.Pending)
-                    {
-                        <form asp-action="ApprovePendingConfirmed" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <button type="submit" class="btn btn-success btn-sm px-3">Approve</button>
-                        </form>
-                        <form asp-action="RejectPendingConfirmed" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <button type="submit" class="btn btn-outline-danger btn-sm px-3">Reject</button>
-                        </form>
-                    }
-                    else if (Model.Status == AccountStatus.Active || Model.Status == AccountStatus.Inactive)
-                    {
-                        <form asp-action="ToggleActiveInactive" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@Model.Id" />
-                            <button type="submit" class="btn btn-sm px-3 @(Model.Status == AccountStatus.Active ? "btn-outline-warning" : "btn-outline-success")">
-                                @(Model.Status == AccountStatus.Active ? "Deactivate" : "Activate")
-                            </button>
-                        </form>
-                    }
-                </div>
-
-            </div>
-        </div>
-    </div>
 
     <!-- Status transition hint -->
     <p class="text-muted mb-0 fs-8">
