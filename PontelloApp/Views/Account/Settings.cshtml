@@ -139,8 +139,6 @@
                         <input type="text" name="City" value="@Model.City" class="form-control editable-field" disabled />
                     </div>
                     <div class="col-sm-3">
-                        <label class="form-label">Province</label>
-                         <div class="col-sm-3">
                              <div id="province">
                                  <label class="form-label">Province</label>
                                  @Html.DropDownListFor(
@@ -157,7 +155,7 @@
                     </div>
                     <div class="col-sm-3">
                         <label class="form-label">Country</label>
-                        <select name="Country" class="form-select editable-field" disabled>
+                        <select name="Country" id="country" class="form-select editable-field" disabled>
                             <option value="Canada" selected="@(Model.Country == "Canada")">Canada</option>
                             <option value="United States" selected="@(Model.Country == "United States")">United States</option>
                         </select>
