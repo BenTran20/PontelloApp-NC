@@ -227,7 +227,7 @@ namespace PontelloApp.Controllers
 
             var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
 
-            return File(bytes, "text/csv", $"SalesReport_{DateTime.Now:yyyyMMdd}.csv");
+            return File(bytes, "text/csv", $"SalesReport_{DateTime.UtcNow:yyyyMMdd}.csv");
         }
 
         public async Task<IActionResult> ExportSalesPdf(DateTime? fromDate, DateTime? toDate, OrderStatus? status)
@@ -269,7 +269,7 @@ namespace PontelloApp.Controllers
                     {
                         col.Item().Text($"Total Orders: {orders.Count}");
                         col.Item().Text($"Total Revenue: ${totalRevenue:0.00}");
-                        col.Item().Text($"Generated: {DateTime.Now:yyyy-MM-dd}");
+                        col.Item().Text($"Generated: {DateTime.UtcNow:yyyy-MM-dd}");
 
                         col.Item().PaddingVertical(10);
 
@@ -308,7 +308,7 @@ namespace PontelloApp.Controllers
                 });
             }).GeneratePdf();
 
-            return File(pdf, "application/pdf", $"SalesReport_{DateTime.Now:yyyyMMdd}.pdf");
+            return File(pdf, "application/pdf", $"SalesReport_{DateTime.UtcNow:yyyyMMdd}.pdf");
         }
 
         public async Task<IActionResult> PrintOrder(string poNumber)

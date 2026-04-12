@@ -198,11 +198,11 @@ namespace PontelloApp.Controllers
                 return RedirectToAction("Cart");
 
             // generate PO, keep status as Draft until shipping is provided
-            cart.PONumber = $"PO-{DateTime.Now:yyyyMMddHHmmss}";
+            cart.PONumber = $"PO-{DateTime.UtcNow:yyyyMMddHHmmss}";
 
             cart.UserId = user.Id;
             cart.Status = OrderStatus.Progress;
-            cart.CreatedAt = DateTime.Now;
+            cart.CreatedAt = DateTime.UtcNow;
 
             // create a shipping placeholder so Shipping view/controller always has an object to update (including BIN/EIN)
             if (cart.Shipping == null)
