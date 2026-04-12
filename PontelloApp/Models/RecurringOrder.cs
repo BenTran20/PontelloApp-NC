@@ -18,6 +18,8 @@ namespace PontelloApp.Models
         public int? MonthlyDay { get; set; }
 
         public DateTime NextRun { get; set; }
+        public bool WarningSent { get; set; } = false;
+        public DateTime? WarningSentAt { get; set; }
 
         public bool IsActive { get; set; } = true;
     }
