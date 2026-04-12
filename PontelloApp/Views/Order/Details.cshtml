@@ -1,6 +1,6 @@
 @model PontelloApp.Models.Order
 @using PontelloApp.Models
-
+@using PontelloApp.Ultilities
 @{
     ViewData["Title"] = "Order #" + Model.PONumber;
 
@@ -50,7 +50,7 @@
                     }
                     else
                     {
-                        <div class="small opacity-75">PO Number: @Model.PONumber | Date: @DateTime.Now.ToString("dd MMM yyyy")</div>
+                        <div class="small opacity-75">PO Number: @Model.PONumber | Date: @DateTime.UtcNow.ToEastern().ToString("dd MMM yyyy")</div>
                     }
                 </div>
             </div>

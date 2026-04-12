@@ -1,5 +1,5 @@
 @model IEnumerable<PontelloApp.Models.Order>
-
+@using PontelloApp.Ultilities
 @{
     ViewData["Title"] = "Order Management";
 
@@ -135,7 +135,7 @@
                                                     <span class="badge bg-info ms-1">Auto</span>
                                                 }
                                             </td>
-                                            <td>@o.CreatedAt</td>
+                                            <td>@o.CreatedAt.ToEastern().ToString("MMM dd, yyyy hh:mm tt")</td>
                                             <td>@o.Shipping.Email</td>
                                             <td>$@o.TotalAmount</td>
                                             <td>@(o.Shipping?.FullAddress ?? "<span class='text-muted'>Not provided</span>")</td>
@@ -203,7 +203,7 @@
                                     <tr>
                                         <td class="fw-semibold">@s.OriginalOrder?.PONumber</td>
                                         <td>@s.Frequency</td>
-                                        <td>@s.NextRun:dd/MM/yyyy HH:mm</td>
+                                        <td>@s.NextRun.ToEastern().ToString("dd/MM/yyyy hh:mm tt")</td>
                                         <td>@s.OriginalOrder?.UserId</td>
                                         <td><span class="badge rounded-pill bg-success">Active</span></td>
                                     </tr>
