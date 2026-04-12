@@ -1,12 +1,4 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using NuGet.Protocol.Plugins;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.Style;
-using Org.BouncyCastle.Utilities;
 using PontelloApp.Data;
 using PontelloApp.Models;
 using PontelloApp.Services;
@@ -34,11 +26,9 @@ namespace PontelloApp.Utilities
                 var payment = scope.ServiceProvider.GetRequiredService<RecurringOrderService>();
                 var notify = scope.ServiceProvider.GetRequiredService<RecurringOrderProcessorJob>();
 
-
-
                 var dueEmails = db.ScheduledEmails
                     .Include(e => e.RecurringOrder)
-                    .Where(e => e.NextSendAt <= DateTime.Now)
+                    .Where(e => e.NextSendAt <= DateTime.UtcNow)
                     .ToList();
 
                 foreach (var schedule in dueEmails)
@@ -46,73 +36,60 @@ namespace PontelloApp.Utilities
                     var recurring = await db.RecurringOrders
                                 .FirstOrDefaultAsync(x => x.Id == schedule.RecurringOrderId);
 
-                    //Skips code
-                    if (!recurring.IsActive)
+                    if (recurring == null || !recurring.IsActive)
                     {
+                        db.ScheduledEmails.Remove(schedule);
                         continue;
                     }
 
-                    var tempPath = Path.Combine(Path.GetTempPath(), schedule.AttachmentName);
-                    System.IO.File.WriteAllBytes(tempPath, schedule.AttachmentBytes);
-
-                    if (schedule.PaymentTime == true)
+                    try
                     {
-                        int newOrderId = await payment.CreateOrderFromRecurring(recurring);
-
-                        var order = await db.Orders
-                        .Include(o => o.Shipping)
-                        .Include(o => o.Items)
-                        .ThenInclude(i => i.Product)
-                        .FirstOrDefaultAsync(o => o.Id == newOrderId);
-
-                        byte[] pdfBytes = GeneratePurchaseOrderPdf(order);
-                        tempPath = Path.Combine(Path.GetTempPath(), $"PO_{order.PONumber}.pdf");
-                        System.IO.File.WriteAllBytes(tempPath, pdfBytes);
-
-                        await emailSender.SendEmailWithAttachmentAsync(
-                            schedule.Email,
-                            $"Your Pontello Order {order.PONumber}",
-                            schedule.HtmlBody,
-                            tempPath
-                        );
-
-                        recurring.IsActive = false;
-                    }
-
-                    if (schedule.PaymentTime == false)
-                    {
-                        await emailSender.SendEmailAsync(
-                                   schedule.Email,
-                                   schedule.Subject,
-                                   schedule.HtmlBody
-                           );
-                        switch (schedule.RecurringOrder.Frequency)
+                        if (schedule.PaymentTime == true)
                         {
-                            case "Daily":
-                                schedule.NextSendAt = schedule.NextSendAt.AddDays(1);
-                                break;
-                            case "Weekly":
-                                schedule.NextSendAt = schedule.NextSendAt.AddDays(7);
-                                break;
-                            case "Monthly":
-                                schedule.NextSendAt = schedule.NextSendAt.AddMonths(1);
-                                break;
-                            default:
-                                schedule.NextSendAt = schedule.NextSendAt.AddDays(1);
-                                break;
+                            int newOrderId = await payment.CreateOrderFromRecurring(recurring);
+
+                            var order = await db.Orders
+                                .Include(o => o.Shipping)
+                                .Include(o => o.Items)
+                                .ThenInclude(i => i.Product)
+                                .FirstOrDefaultAsync(o => o.Id == newOrderId);
+
+                            byte[] pdfBytes = GeneratePurchaseOrderPdf(order);
+                            var tempPath = Path.Combine(Path.GetTempPath(), $"PO_{order.PONumber}.pdf");
+                            System.IO.File.WriteAllBytes(tempPath, pdfBytes);
+
+                            await emailSender.SendEmailWithAttachmentAsync(
+                                schedule.Email,
+                                $"Your Pontello Order {order.PONumber}",
+                                schedule.HtmlBody,
+                                tempPath
+                            );
+
+                            if (File.Exists(tempPath))
+                                File.Delete(tempPath);
+
+                            recurring.IsActive = false;
+                            db.ScheduledEmails.Remove(schedule);
                         }
 
+                        if (schedule.PaymentTime == false)
+                        {
+                            await emailSender.SendEmailAsync(
+                                schedule.Email,
+                                schedule.Subject,
+                                schedule.HtmlBody
+                            );
+
+                            db.ScheduledEmails.Remove(schedule);
+                        }
                     }
-
-
-                    if (File.Exists(tempPath))
+                    catch (Exception ex)
                     {
-                        File.Delete(tempPath);
+                        Console.WriteLine($"Failed to send email {schedule.Id}: {ex.Message}");
                     }
                 }
 
-                    await db.SaveChangesAsync();
-
+                await db.SaveChangesAsync();
                 await Task.Delay(TimeSpan.FromSeconds(45), stoppingToken);
             }
         }
@@ -245,7 +222,7 @@ namespace PontelloApp.Utilities
                     // FOOTER
                     page.Footer()
                         .AlignCenter()
-                        .Text($"Generated {DateTime.Now:yyyy-MM-dd HH:mm}")
+                        .Text($"Generated {DateTime.UtcNow:yyyy-MM-dd HH:mm}")
                         .FontSize(10)
                         .FontColor("#777777");
                 });
