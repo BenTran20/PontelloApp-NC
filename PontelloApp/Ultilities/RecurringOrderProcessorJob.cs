@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PontelloApp.Controllers;
 using PontelloApp.Data;
 using PontelloApp.Models;
 using PontelloApp.Services;
@@ -24,7 +23,7 @@ namespace PontelloApp.Ultilities
         public async Task RunAsync()
         {
             var warningLeadTime = TimeSpan.FromHours(4);
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
 
             var due = await _db.RecurringOrders
                 .Where(r => r.IsActive && r.NextRun <= now)
@@ -39,6 +38,7 @@ namespace PontelloApp.Ultilities
             // Warning email
             foreach (var r in toWarn)
             {
+                if (r.WarningSent) continue;
                 var order = await _db.Orders
                     .Include(o => o.Shipping)
                     .Include(o => o.Items)
@@ -46,7 +46,12 @@ namespace PontelloApp.Ultilities
                     .FirstOrDefaultAsync(o => o.Id == r.OriginalOrderId);
 
                 if (order != null)
+                {
                     await _emailSvc.ScheduleWarningEmail(order, r);
+                    r.WarningSent = true;
+                    r.WarningSentAt = DateTime.UtcNow;
+                    await _db.SaveChangesAsync();
+                }
             }
 
             // Process order + payment email
@@ -86,13 +91,16 @@ namespace PontelloApp.Ultilities
                 });
 
                 r.NextRun = CalculateNextRun(r);
+                r.WarningSent = false;
+                r.WarningSentAt = null;
+
                 await _db.SaveChangesAsync();
             }
         }
 
         private DateTime CalculateNextRun(RecurringOrder r)
         {
-            var nowLocal = DateTime.Now;
+            var nowLocal = DateTime.UtcNow;
             DateTime nextLocal;
 
             if (r.Frequency == "Daily")

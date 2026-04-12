@@ -115,6 +115,8 @@ namespace PontelloApp.Data.POMigrations
                     WeeklyDay = table.Column<int>(type: "INTEGER", nullable: true),
                     MonthlyDay = table.Column<int>(type: "INTEGER", nullable: true),
                     NextRun = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    WarningSent = table.Column<bool>(type: "INTEGER", nullable: false),
+                    WarningSentAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>

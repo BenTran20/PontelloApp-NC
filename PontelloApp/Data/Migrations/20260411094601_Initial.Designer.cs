@@ -11,7 +11,7 @@ using PontelloApp.Data;
 namespace PontelloApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260403034329_Initial")]
+    [Migration("20260411094601_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -444,6 +444,12 @@ namespace PontelloApp.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<TimeSpan>("TimeOfDay")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("WarningSent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("WarningSentAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("WeeklyDay")

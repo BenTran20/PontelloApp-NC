@@ -1,5 +1,5 @@
 @model PontelloApp.Models.Order
-
+@using PontelloApp.Ultilities
 @{
     ViewData["Title"] = "Shipped Order";
 }
@@ -13,7 +13,7 @@
 
             <div class="text-muted small">
                 PO#: <strong>@Model.PONumber</strong>
-                • Created @Model.CreatedAt.ToString("f")
+                • Created @Model.CreatedAt.ToEastern().ToString("f")
             </div>
         </div>
 

@@ -350,6 +350,12 @@ namespace PontelloApp.Data.POMigrations
                     b.Property<TimeSpan>("TimeOfDay")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("WarningSent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("WarningSentAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("WeeklyDay")
                         .HasColumnType("INTEGER");
 
