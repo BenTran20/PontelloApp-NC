@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using PontelloApp.Custom_Controllers;
 using PontelloApp.Data;
 using PontelloApp.Models;
 using PontelloApp.Ultilities;
 using QuestPDF.Fluent;
-using System.Timers;
 
 namespace PontelloApp.Controllers
 {
@@ -77,12 +75,13 @@ namespace PontelloApp.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
+            model.TimeOfDay = model.TimeOfDay.TimeOfDayToUtc();
             model.NextRun = CalculateNextRun(model);
+
             _context.Add(model);
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Recurring order created.";
-            //RecurrMessage(model.OriginalOrderId, model);
             return RedirectToAction("Details", "Order", new { id = model.OriginalOrderId });
         }
 
@@ -100,6 +99,8 @@ namespace PontelloApp.Controllers
             {
                 return NotFound();
             }
+            recurringOrder.TimeOfDay = recurringOrder.TimeOfDay.TimeOfDayToEastern();
+
             ViewData["OriginalOrderId"] = new SelectList(_context.Orders, "Id", "Id", recurringOrder.OriginalOrderId);
             return View(recurringOrder);
         }
@@ -120,6 +121,9 @@ namespace PontelloApp.Controllers
             {
                 try
                 {
+                    recurringOrder.TimeOfDay = recurringOrder.TimeOfDay.TimeOfDayToUtc();
+                    recurringOrder.NextRun = CalculateNextRun(recurringOrder);
+
                     _context.Update(recurringOrder);
                     await _context.SaveChangesAsync();
                 }
@@ -207,7 +211,7 @@ namespace PontelloApp.Controllers
 
         private DateTime CalculateNextRun(RecurringOrder r)
         {
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
 
             if (r.Frequency == "Daily")
             {
@@ -253,7 +257,7 @@ namespace PontelloApp.Controllers
 
             var warningTime = recurring.NextRun.AddHours(-4);
 
-            if (DateTime.Now >= recurring.NextRun)
+            if (DateTime.UtcNow >= recurring.NextRun)
                 return;
 
             bool exists = _context.ScheduledEmails.Any(e =>
@@ -451,7 +455,7 @@ namespace PontelloApp.Controllers
                     // FOOTER
                     page.Footer()
                         .AlignCenter()
-                        .Text($"Generated {DateTime.Now:yyyy-MM-dd HH:mm}")
+                        .Text($"Generated {DateTime.UtcNow:yyyy-MM-dd HH:mm}")
                         .FontSize(10)
                         .FontColor("#777777");
                 });
