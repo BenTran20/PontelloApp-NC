@@ -38,6 +38,28 @@ namespace PontelloApp.Controllers
                     o.UserId == user.Id &&
                     o.Status == OrderStatus.Draft);
 
+            if (order == null)
+                return View(null);
+            
+            bool changed = false;
+            
+            foreach (var item in order.Items)
+            {
+                int stock = (int)item.ProductVariant.StockQuantity;
+            
+                if (item.Quantity > stock)
+                {
+                    item.Quantity = stock;
+                    changed = true;
+            
+                    TempData["Stock"] =
+                        $"Max stock.";
+                }
+            }
+            
+            if (changed)
+                await _context.SaveChangesAsync();
+
             return View(order);
         }
 
@@ -65,7 +87,9 @@ namespace PontelloApp.Controllers
 
             if (quantity > item.ProductVariant.StockQuantity)
             {
+                TempData["Stock"] = "Max stock";
                 quantity = (int)item.ProductVariant.StockQuantity;
+                item.Quantity = quantity;
             }
 
             var order = item.Order;
