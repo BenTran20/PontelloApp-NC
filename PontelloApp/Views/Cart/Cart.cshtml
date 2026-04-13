@@ -72,6 +72,12 @@
 
                                         <button type="submit" class="d-none update-typed"></button>
                                     </form>
+                                    @if (TempData["Stock"] != null)
+                                    {
+                                        <div class="text-danger small mt-1" style="font-size: 0.7rem;">
+                                            @TempData["Stock"]
+                                        </div>
+                                    }
                                 </div>
 
                                 <!-- Total -->
@@ -170,15 +176,18 @@
 @section Scripts {
     <script>
         $(function () {
+                 $('.allow-enter').on('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, "");
+            });
+
             $('.allow-enter').on('keydown', function (e) {
                 if (e.keyCode === 13) {
                     e.preventDefault();
-                        $(this).closest('form').submit(); // submit typed value
-
+                        $(this).closest('form').submit(); 
                 }
             });
 
-            $('.allow-enter').on('change', function () {
+            $('.allow-enter').on('blur change', function () {
                 $(this).closest('form').submit();
             });
         });
