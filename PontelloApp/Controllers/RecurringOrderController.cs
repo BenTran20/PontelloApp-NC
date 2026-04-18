@@ -75,6 +75,10 @@ namespace PontelloApp.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
+            model.TimeOfDay = model.TimeOfDay.Subtract(
+                TimeSpan.FromDays(Math.Floor(model.TimeOfDay.TotalDays))
+            );
+
             model.TimeOfDay = model.TimeOfDay.TimeOfDayToUtc();
             model.NextRun = CalculateNextRun(model);
 
@@ -113,16 +117,21 @@ namespace PontelloApp.Controllers
         public async Task<IActionResult> Edit(int id, [Bind("Id,OriginalOrderId,Frequency,TimeOfDay,WeeklyDay,MonthlyDay,NextRun,IsActive")] RecurringOrder recurringOrder)
         {
             if (id != recurringOrder.Id)
-            {
                 return NotFound();
-            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    recurringOrder.TimeOfDay = recurringOrder.TimeOfDay.Subtract(
+                        TimeSpan.FromDays(Math.Floor(recurringOrder.TimeOfDay.TotalDays))
+                    );
+
                     recurringOrder.TimeOfDay = recurringOrder.TimeOfDay.TimeOfDayToUtc();
                     recurringOrder.NextRun = CalculateNextRun(recurringOrder);
+
+                    recurringOrder.WarningSent = false;
+                    recurringOrder.WarningSentAt = null;
 
                     _context.Update(recurringOrder);
                     await _context.SaveChangesAsync();
@@ -130,17 +139,13 @@ namespace PontelloApp.Controllers
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!RecurringOrderExists(recurringOrder.Id))
-                    {
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
                 return RedirectToAction(nameof(Index));
             }
-            //ScheduleWarningEmail(recurringOrder.OriginalOrderId, recurringOrder);
+
             ViewData["OriginalOrderId"] = new SelectList(_context.Orders, "Id", "Id", recurringOrder.OriginalOrderId);
             return View(recurringOrder);
         }
