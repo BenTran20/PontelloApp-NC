@@ -19,8 +19,6 @@ namespace PontelloApp.Ultilities
         {
             if (order == null || string.IsNullOrWhiteSpace(order.Shipping?.Email)) return;
 
-            if (DateTime.UtcNow >= recurring.NextRun.AddHours(-4)) return;
-
             var warningTime = recurring.NextRun.AddHours(-4);
 
             bool exists = await _db.ScheduledEmails
