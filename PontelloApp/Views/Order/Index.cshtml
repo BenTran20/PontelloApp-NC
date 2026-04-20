@@ -1,6 +1,6 @@
 @using PontelloApp.Models
 @model IEnumerable<PontelloApp.Models.Order>
-
+@using PontelloApp.Ultilities
 @{
     ViewData["Title"] = "My Orders";
 
@@ -141,7 +141,7 @@
 
                                 <!-- DATE -->
                                 <td>
-                                    @o.CreatedAt.ToString("MMM dd, yyyy")
+                                    @o.CreatedAt.ToEastern().ToString("dd/MM/yyyy hh:mm tt")
                                 </td>
 
                                 <!-- TOTAL -->
@@ -228,7 +228,7 @@
                                                     </li>
 
                                                     <!-- AUTO ORDER -->
-@*                                                     <li>
+                                                     <li>
                                                         <a class="dropdown-item"
                                                            asp-controller="RecurringOrder"
                                                            asp-action="Create"
@@ -248,7 +248,7 @@
                                                             <i class="bi bi-calendar-event me-2"></i>
                                                             Manage Schedule
                                                         </a>
-                                                    </li> *@
+                                                    </li> 
                                                 }
 
                                             </ul>

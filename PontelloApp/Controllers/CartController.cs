@@ -38,6 +38,28 @@ namespace PontelloApp.Controllers
                     o.UserId == user.Id &&
                     o.Status == OrderStatus.Draft);
 
+            if (order == null)
+                return View(null);
+            
+            bool changed = false;
+            
+            foreach (var item in order.Items)
+            {
+                int stock = (int)item.ProductVariant.StockQuantity;
+            
+                if (item.Quantity > stock)
+                {
+                    item.Quantity = stock;
+                    changed = true;
+            
+                    TempData["Stock"] =
+                        $"Max stock.";
+                }
+            }
+            
+            if (changed)
+                await _context.SaveChangesAsync();
+
             return View(order);
         }
 
@@ -65,7 +87,9 @@ namespace PontelloApp.Controllers
 
             if (quantity > item.ProductVariant.StockQuantity)
             {
+                TempData["Stock"] = "Max stock";
                 quantity = (int)item.ProductVariant.StockQuantity;
+                item.Quantity = quantity;
             }
 
             var order = item.Order;
@@ -198,11 +222,11 @@ namespace PontelloApp.Controllers
                 return RedirectToAction("Cart");
 
             // generate PO, keep status as Draft until shipping is provided
-            cart.PONumber = $"PO-{DateTime.Now:yyyyMMddHHmmss}";
+            cart.PONumber = $"PO-{DateTime.UtcNow:yyyyMMddHHmmss}";
 
             cart.UserId = user.Id;
             cart.Status = OrderStatus.Progress;
-            cart.CreatedAt = DateTime.Now;
+            cart.CreatedAt = DateTime.UtcNow;
 
             // create a shipping placeholder so Shipping view/controller always has an object to update (including BIN/EIN)
             if (cart.Shipping == null)

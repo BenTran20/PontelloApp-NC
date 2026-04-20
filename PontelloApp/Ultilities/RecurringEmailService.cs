@@ -20,11 +20,11 @@ namespace PontelloApp.Ultilities
             if (order == null || string.IsNullOrWhiteSpace(order.Shipping?.Email)) return;
 
             var warningTime = recurring.NextRun.AddHours(-4);
-            if (warningTime <= DateTime.Now)
-                warningTime = DateTime.Now.AddMinutes(1);
 
             bool exists = await _db.ScheduledEmails
-                .AnyAsync(e => e.RecurringOrderId == recurring.Id && e.NextSendAt == warningTime && e.PaymentTime == false);
+                .AnyAsync(e => e.RecurringOrderId == recurring.Id
+                   && e.PaymentTime == false
+                   && e.NextSendAt == warningTime);
 
             if (exists) return;
 
@@ -207,7 +207,7 @@ namespace PontelloApp.Ultilities
 
                     page.Footer()
                         .AlignCenter()
-                        .Text($"Generated {DateTime.Now:yyyy-MM-dd HH:mm}")
+                        .Text($"Generated {DateTime.UtcNow:yyyy-MM-dd HH:mm}")
                         .FontSize(10)
                         .FontColor("#777777");
                 });
