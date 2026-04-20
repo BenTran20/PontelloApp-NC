@@ -10,6 +10,29 @@
     var initials = $"{Model.FirstName?[0]}{Model.LastName?[0]}".ToUpper();
 }
 
+ @{
+    var provinces = new List<string>
+           {
+           "Alberta","British Columbia","Manitoba","New Brunswick","Newfoundland and Labrador",
+           "Northwest Territories","Nova Scotia","Nunavut","Ontario","Prince Edward Island",
+           "Quebec","Saskatchewan","Yukon"
+           };
+    var states = new List<string>
+           {
+           "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
+           "Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
+           "Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan",
+           "Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
+           "New Hampshire","New Jersey","New Mexico","New York","North Carolina",
+           "North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
+           "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
+           "Virginia","Washington","West Virginia","Wisconsin","Wyoming"
+           };
+
+     var provinceList = new SelectList(provinces);
+     var stateList = new SelectList(states);
+  }
+
 <div class="container-fluid py-4" style="max-width: 960px;">
     <div class="row g-4">
 
@@ -67,72 +90,91 @@
                         <div class="row g-3 mb-3">
                             <div class="col-sm-6">
                                 <label class="form-label">First name</label>
-                                <input type="text" name="FirstName" value="@Model.FirstName" class="form-control" required />
+                                        <input type="text" name="FirstName" value="@Model.FirstName" class="form-control editable-field" required disabled />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Last name</label>
+                        <input type="text" name="LastName" value="@Model.LastName" class="form-control editable-field" required disabled />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="Email" value="@Model.Email" class="form-control editable-field" required disabled />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Phone number</label>
+                        <input type="tel" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control editable-field" disabled />
+                    </div>
+                </div>
+                
+                <hr class="my-3" />
+                <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Company</p>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <label class="form-label">Company name</label>
+                        <input type="text" name="CompanyName" value="@Model.CompanyName" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label">
+                            BIN / EIN
+                            <span class="text-muted fw-normal">(optional)</span>
+                        </label>
+                        <input type="text" name="BINorEIN" value="@Model.BINorEIN" class="form-control editable-field" placeholder="12-3456789" disabled />
+                        <div class="form-text">Marks account as tax-exempt.</div>
+                    </div>
+                </div>
+                
+                <hr class="my-3" />
+                <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Shipping / billing address</p>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <label class="form-label">Street address</label>
+                        <input type="text" name="AddressLine1" value="@Model.AddressLine1" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label">Suite / Unit <span class="text-muted fw-normal">(optional)</span></label>
+                        <input type="text" name="AddressLine2" value="@Model.AddressLine2" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">City</label>
+                        <input type="text" name="City" value="@Model.City" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-3">
+                             <div id="province">
+                                 <label class="form-label">Province</label>
+                                 @Html.DropDownListFor(
+                                    p => p.Province,
+                                    provinceList,
+                                    "Select a Province",
+                                    new { @class = "form-select editable-field", disabled = "disabled" }
+                                 )
                             </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Last name</label>
-                                <input type="text" name="LastName" value="@Model.LastName" class="form-control" required />
+                             <div id="state">
+                                 <label class="form-label">State</label>
+                                  @Html.DropDownListFor(
+                                       s => s.Province,
+                                       stateList,
+                                       "Select a State",
+                                       new { @class = "form-select editable-field", disabled = "disabled" }
+                                    ) 
                             </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="Email" value="@Model.Email" class="form-control" required />
-                            </div>
-                            <div class="col-sm-6">
-                                <label class="form-label">Phone number</label>
-                                <input type="tel" name="PhoneNumber" value="@Model.PhoneNumber" class="form-control" />
-                            </div>
-                        </div>
-
-                        <hr class="my-3" />
-                        <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Company</p>
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-7">
-                                <label class="form-label">Company name</label>
-                                <input type="text" name="CompanyName" value="@Model.CompanyName" class="form-control" />
-                            </div>
-                            <div class="col-sm-5">
-                                <label class="form-label">
-                                    BIN / EIN
-                                    <span class="text-muted fw-normal">(optional)</span>
-                                </label>
-                                <input type="text" name="BINorEIN" value="@Model.BINorEIN" class="form-control" placeholder="12-3456789" />
-                                <div class="form-text">Marks account as tax-exempt.</div>
-                            </div>
-                        </div>
-
-                        <hr class="my-3" />
-                        <p class="text-uppercase fw-semibold mb-3" style="font-size:12px; letter-spacing:.07em; color:#adb5bd;">Shipping / billing address</p>
-                        <div class="row g-3 mb-3">
-                            <div class="col-sm-7">
-                                <label class="form-label">Street address</label>
-                                <input type="text" name="AddressLine1" value="@Model.AddressLine1" class="form-control" placeholder="123 Main Street" />
-                            </div>
-                            <div class="col-sm-5">
-                                <label class="form-label">Suite / Unit <span class="text-muted fw-normal">(optional)</span></label>
-                                <input type="text" name="AddressLine2" value="@Model.AddressLine2" class="form-control" placeholder="Suite 400" />
-                            </div>
-                            <div class="col-sm-4">
-                                <label class="form-label">City</label>
-                                <input type="text" name="City" value="@Model.City" class="form-control" />
-                            </div>
-                            <div class="col-sm-3">
-                                <label class="form-label">Province / State</label>
-                                <input type="text" name="Province" value="@Model.Province" class="form-control" placeholder="ON" />
-                            </div>
-                            <div class="col-sm-2">
-                                <label class="form-label">Postal / ZIP</label>
-                                <input type="text" name="PostalCode" value="@Model.PostalCode" class="form-control" />
-                            </div>
-                            <div class="col-sm-3">
-                                <label class="form-label">Country</label>
-                                <select name="Country" class="form-select">
-                                    <option value="Canada" selected="@(Model.Country == "Canada")">Canada</option>
-                                    <option value="United States" selected="@(Model.Country == "United States")">United States</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2 mt-3">
+                    </div>
+                    <div class="col-sm-2">
+                        <label class="form-label">Postal / ZIP</label>
+                        <input type="text" name="PostalCode" value="@Model.PostalCode" class="form-control editable-field" disabled />
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="form-label">Country</label>
+                        <select name="Country" id="Country" class="form-select editable-field" disabled>
+                            <option value="Canada" selected="@(Model.Country == "Canada")">Canada</option>
+                            <option value="United States" selected="@(Model.Country == "United States")">United States</option>
+                        </select>
+                    </div>
+                </div>
+                
+                      <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button id="enable-edit" type="button" class="btn btn-dark">
+                                Edit
+                            </button>
                             <button type="submit" class="btn btn-dark">
                                 Save changes
                             </button>
@@ -190,4 +232,34 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // For editing settings
+        document.getElementById("enable-edit").addEventListener("click", function () {
+            document.querySelectorAll(".editable-field").forEach(el => {
+                el.disabled = false;
+            });
+        });
+
+         // For selecting Province or State depending on chosen country
+         function toggleRegionDropdowns() {
+             const country = document.getElementById("Country").value;
+             const province = document.getElementById("province");
+             const state = document.getElementById("state");
+        
+             if (country === "Canada") {
+                 province.style.display = "block";
+                 state.style.display = "none";
+             } else {
+                 province.style.display = "none";
+                 state.style.display = "block";
+             }
+         }
+    
+     // Run on page load
+     toggleRegionDropdowns();
+    
+     // Run when country changes
+     document.getElementById("Country").addEventListener("change", toggleRegionDropdowns);
+    </script>
 }

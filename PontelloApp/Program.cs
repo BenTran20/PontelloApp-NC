@@ -138,7 +138,6 @@ using (var scope = app.Services.CreateScope())
 
     PontelloAppInitializer.Initialize(serviceProvider: services, DeleteDatabase: false,
         UseMigrations: true, SeedSampleData: true);
-
 }
 
 QuestPDF.Settings.License = LicenseType.Community;
